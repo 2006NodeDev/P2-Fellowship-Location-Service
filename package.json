@@ -1,0 +1,29 @@
+{
+  "name": "project-2",
+  "version": "1.0.0",
+  "description": "Fellowship of the Ping location service",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "nodemon --exec ts-node src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "RchlRiedel",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.6",
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/pg": "^7.14.3",
+    "nodemon": "^2.0.4",
+    "ts": "^0.2.2",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "@google-cloud/pubsub": "^2.2.0",
+    "@google-cloud/storage": "^5.1.2",
+    "axios": "^0.19.2",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.2.1"
+  }
+}
