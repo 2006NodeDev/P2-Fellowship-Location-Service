@@ -4,12 +4,12 @@ import { getAllLocationsService, findLocationByIdService, userUpdateLocationServ
 import { LocationIdInputError } from '../errors/Location-Id-Input-Error'
 import { LocationIdNumberNeededError } from '../errors/Location-Id-Number-Needed-Error'
 import { LocationNotVisitedError } from '../errors/Location-Not-Visted-Error'
-import { authenticationMiddleware } from '../middleware/authentication-middleware'
+//import { authenticationMiddleware } from '../middleware/authentication-middleware'
  
 export let locationRouter = express.Router()
 
 //we're setting this here and not in the index
-locationRouter.use(authenticationMiddleware)
+//locationRouter.use(authenticationMiddleware)
 
 //GET all locations
 locationRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
@@ -39,12 +39,11 @@ locationRouter.get('/:locationId', async (req: Request, res: Response, next:Next
 })
 
 //PATCH user update 
-locationRouter.patch('/update/:locationId', async (req:Request, res:Response, next:NextFunction) => {
-    let locationIdIput = req.params
-    //make sure it's a number
-    let locationId = +locationIdIput
-    //let userId = req.session.user.userId  
-    //how do we do this??????????????????????????????????
+locationRouter.patch('/update/:locationId', async (req:any, res:Response, next:NextFunction) => {
+    let locationId = req.params
+    let currentUserId = req.user.userId
+    //make sure they are number below
+
     let {visited, rating, image} = req.body
 
     if(!locationId || isNaN(+locationId)) { 
@@ -54,7 +53,7 @@ locationRouter.patch('/update/:locationId', async (req:Request, res:Response, ne
     } else {
         try {
            //this is going to be the array returned (with placesVisited, numVisited, (avg)rating, and Images[])
-            let updatesMade = await userUpdateLocationService(locationId, userId, visited, rating, image)
+            let updatesMade = await userUpdateLocationService(+locationId, +currentUserId, visited, rating, image)
             console.log(updatesMade);
             
             res.status(200).send("Your contribution has been taken into consideration")
