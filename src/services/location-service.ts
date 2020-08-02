@@ -14,5 +14,5 @@ export async function userUpdateLocationService(locationId: number, userId: numb
     let location = await findLocationById(locationId)
     console.log(location); //check that it's been updating/returning the right thing
     return location
-    //I think this should work... this way we get the updated location
+    //this way we are updating the location and getting the updated location to send back to the front end
 }
