@@ -20,6 +20,7 @@ export async function getAllLocations(): Promise<Location[]> {
         //send query
         let results: QueryResult = await client.query(`select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
                                             array_agg(distinct (li."image")) as images
+                                            array_agg(distinct (li."image_id")) as image_ids
                                             from project_2.locations l
                                             left join project_2.locations_location_images lli on l."location_id"=lli."location_id"
                                             left join project_2.location_images li on li."image_id"=lli."image_id"
@@ -37,57 +38,6 @@ export async function getAllLocations(): Promise<Location[]> {
     }
 }
 
-// //find all images that belong to a location(?)
-// export async function getAllLocationImages(locationId:number): Promise<Image[]>{
-//      //first, decleare a client
-//      let client: PoolClient;
-//      try {
-//          //get connection
-//          client = await connectionPool.connect()
-//          //send query - get the array of images
-//          let results: QueryResult = await client.query(`select li."image_id", li."image" 
-//                                                             from project_2.location_images li 
-//                                                             left join project_2.locations_location_images lli on li.image_id=lli.image_id 
-//                                                             where lli.location_id =$1;`, [locationId])
-//          //return results
-//          console.log(results);        
-//          return results.rows.map(ImageDTOtoImageConverter)
-//      } catch (e) {
-//          //if we get an error we don't know
-//          console.log(e)
-//          throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
-//      } finally {
-//          // we make sure client isn't undefined
-//          client && client.release()//then we release it
-//      }
-// }
-
-// //find image by id
-// export async function findImageById(imageId:number): Promise<Image> {
-//     let client: PoolClient;
-//     try{
-//         //id = '1 or 1 = 1; drop table l${schema}.books cascade; select * from l${schema}.book '
-//         client = await connectionPool.connect()
-//         let results: QueryResult = await client.query(`select * from location_images li where li.image_id = $1;`, [imageId])
-
-//         console.log(results.rows[0]);        
-//         if(results.rowCount === 0){
-//             throw new Error('NotFound')
-//         }else{
-//             return ImageDTOtoImageConverter(results.rows[0])
-//         }
-//     }catch(e){
-//         if(e.message === 'NotFound'){
-//             throw new LocationNotFoundError()
-//         }
-//         console.log(e)
-//         throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
-//     }finally{
-//         client && client.release()
-//     }
-// }
-
-
 //find location by ID
 export async function findLocationById(locationId:number): Promise<Location> {
     let client: PoolClient;
@@ -96,6 +46,7 @@ export async function findLocationById(locationId:number): Promise<Location> {
         client = await connectionPool.connect()
         let results: QueryResult = await client.query(`select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
                                             array_agg(distinct (li."image")) as images
+                                            array_agg(distinct (li."image_id")) as image_ids
                                             from project_2.locations l
                                             left join project_2.locations_location_images lli on l."location_id"=lli."location_id"
                                             left join project_2.location_images li on li."image_id"=lli."image_id"

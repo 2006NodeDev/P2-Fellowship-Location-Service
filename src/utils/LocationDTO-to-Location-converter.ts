@@ -6,9 +6,10 @@ import { Image } from "../models/Image";
 export function LocationDTOtoLocationConvertor( dto:LocationDTO):Location{
 
     let image:Image[]=[];
-
+    let x = 0
     for (const i of dto.images){
-        image.push({imageId:0, image:i})
+        image.push({imageId:dto.image_ids[x], image:i})
+        x++
     }
 
     return {
