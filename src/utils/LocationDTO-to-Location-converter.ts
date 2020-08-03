@@ -2,13 +2,15 @@ import { LocationDTO } from "../dtos/location-dto";
 import { Location } from "../models/Location";
 import { Image } from "../models/Image";
 
+
 export function LocationDTOtoLocationConvertor( dto:LocationDTO):Location{
-    let image:Image[] = [];
-    for(const i of dto.images)
-    {   
-       image.push({imageId:0, image:i})//Image Id error comes from here OR from DB joins being incorrect for imgids
+
+    let image:Image[]=[];
+
+    for (const i of dto.images){
+        image.push({imageId:0, image:i})
     }
-    
+
     return {
         locationId:dto.location_id,
         name:dto.name,

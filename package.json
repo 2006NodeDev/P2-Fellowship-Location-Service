@@ -1,7 +1,7 @@
 {
   "name": "project-2",
   "version": "1.0.0",
-  "description": "Fellowship of the Ping location service",
+  "description": "Fellowship location service",
   "main": "src/index.ts",
   "scripts": {
     "start": "nodemon --exec ts-node src/index.ts",
