@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express'
-import { getAllLocationsService, findLocationByIdService, userUpdateLocationService } from "../services/location-service"
+import { getAllLocationsService, findLocationByIdService, userUpdateLocationService, adminUpdateLocationService } from "../services/location-service"
+import { Location } from '../models/Location'
 
 import { LocationIdInputError } from '../errors/Location-Id-Input-Error'
 import { LocationIdNumberNeededError } from '../errors/Location-Id-Number-Needed-Error'
@@ -39,7 +40,7 @@ locationRouter.get('/:locationId', async (req: Request, res: Response, next:Next
 })
 
 //PATCH user update 
-locationRouter.patch('/update/:locationId', async (req:any, res:Response, next:NextFunction) => {
+locationRouter.patch('/user/update/:locationId', async (req:any, res:Response, next:NextFunction) => {
     let locationId = req.params
     let currentUserId = req.user.userId
     //make sure they are number below
@@ -69,81 +70,44 @@ locationRouter.patch('/update/:locationId', async (req:any, res:Response, next:N
 })
 
 
-// //possible patch? for admin
-// locationRouter.patch('/update/:locationId', async (req:Request, res:Response, next:NextFunction) => {
-//     let {locationId} = req.params
-//     //get user id
-//     let { name,
-//         image,//array?
-//         realm, 
-//         governance,
-//         primaryPopulation, 
-//         description,
-//         rating, 
-//         numVisited} = req.body
-//     console.log(req.body)
-//     if(!locationId || isNaN(+locationId)) { 
-//        next (new LocationIdNumberNeededError)    
-//     } else {
-//        //updated the num_visited and places_visited for locations and users resp.
-//        //add a photo to the array 
-//        //add a rating, then upate the locations rating average    
-//         let updatedLocation:Location = 
-//         { 
-//             locationId, 
-//             name,
-//             image,//array?
-//             realm, 
-//             governance,
-//             primaryPopulation, 
-//             description,
-//             rating, 
-//             numVisited
-//         }
-//         updatedLocation.name = name || undefined
-//         updatedLocation.image = image || undefined
-//         updatedLocation.realm =  realm || undefined
-//         updatedLocation.governance =  governance || undefined
-//         updatedLocation.primaryPopulation = primaryPopulation || undefined
-//         updatedLocation.rating =  rating || undefined
-//         updatedLocation.numVisited = numVisited || undefined
-//         try 
-//         {
-//             let updatedLocationResults = await updatelocationInfo(updatedLocation)
-//             res.json(updatedLocationResults)
-//         } 
-//         catch (e) 
-//         {
-//             next(e)
-//         }
-//     }
-// })
-
-
-/*for a new location!
-locationRouter.post('/', (req: Request, res: Response) => {
-    console.log(req.body);
-    let 
-    { 
-        name,
-        image,//array?
+//possible patch? for admin
+locationRouter.patch('/update/:locationId', async (req:Request, res:Response, next:NextFunction) => {
+    let {locationId} = req.params
+    let currentLocationId = +locationId
+    //get user id
+    let { name,
         realm, 
         governance,
         primaryPopulation, 
-        governance,
-        rating, 
-        numVisited,
-         } = req.body //this is destructuring
-    // warning if data is allowed to be null or 0, or false, this check is not sufficient
-    if (locationId && genre && authors && publishingDate && publisher && pages && chapters && title && ISBN && (!series && numVisitedof (series) === 'boolean' || series) && numberInSeries) {
-        //locations.push({ locationId, genre, authors, publisher, publishingDate, pages, chapters, title, series, numberInSeries, ISBN })
-        //send description just sents an empty response with the  description code provided
-        res.send(201)//201 is created
+        description} = req.body
+    //not sure what we sould do for images (to delete, etc.)
+    console.log(req.body)
+    if(!currentLocationId || isNaN(currentLocationId)) { 
+       next (new LocationIdNumberNeededError)    
     } else {
-        // . description sets the  description code but deson't send res
-        // .send can send a response in many different content-numVisiteds
-        throw new LocationUserInputError()
+       //updated the num_visited and places_visited for locations and users resp.
+       //add a photo to the array 
+       //add a rating, then upate the locations rating average    
+        let updatedLocation:Location = { 
+            locationId: currentLocationId, 
+            name,
+            image: (await findLocationByIdService(currentLocationId)).image,//array?
+            realm, 
+            governance,
+            primaryPopulation, 
+            description,
+            rating: (await findLocationByIdService(currentLocationId)).rating, 
+            numVisited:  (await findLocationByIdService(currentLocationId)).numVisited 
+        }
+        updatedLocation.name = name || undefined
+        updatedLocation.realm =  realm || undefined
+        updatedLocation.governance =  governance || undefined
+        updatedLocation.primaryPopulation = primaryPopulation || undefined
+        try {
+            let updatedLocationResults = await adminUpdateLocationService(updatedLocation)
+            res.json(updatedLocationResults)
+        } catch (e) {
+            next(e)
+        }
     }
 })
-
-*/

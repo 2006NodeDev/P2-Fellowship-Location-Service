@@ -1,4 +1,4 @@
-set schema 'project_2';
+set schema 'project_2_location_service';
 
 insert into users ("username", "password", "first_name", "last_name", "affiliation", "places_visited", "address", "email", "role", "image")
 	values ('Mithrandir', 'YouShallNotPass', 'Gandalf', null, 'Fellowship', 1233, null, 'shadofaxTheFast@email.com', 'Admin', null),

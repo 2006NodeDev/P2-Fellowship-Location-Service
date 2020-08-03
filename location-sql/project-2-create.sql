@@ -1,5 +1,5 @@
-create schema project_2;
-set schema 'project_2';
+create schema project_2_location_service;
+set schema 'project_2_location_service';
 
 --drop table users;
 --drop table locations;
