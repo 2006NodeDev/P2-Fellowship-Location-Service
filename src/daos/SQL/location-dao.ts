@@ -7,10 +7,8 @@ import { Image } from "../../models/Image";
 import { LocationNotVisitedError } from "../../errors/Location-Not-Visted-Error";
 import { ImageDTOtoImageConverter } from "../../utils/ImageDTO-to-Image-Converter";
 
+const schema = process.env['P2_SCHEMA'] || 'project_2_location_service'
 
-//const schema = process.env['LB_SCHEMA'] || 'lightlyburning_book_service' must uncomment and match to our database
-
-//get all locations
 export async function getAllLocations(): Promise<Location[]> {
     //first, decleare a client
     let client: PoolClient;
@@ -19,14 +17,15 @@ export async function getAllLocations(): Promise<Location[]> {
         client = await connectionPool.connect()
         //send query
         let results: QueryResult = await client.query(`select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
-                                            array_agg(distinct (li."image")) as images
+                                            array_agg(distinct (li."image")) as images,
                                             array_agg(distinct (li."image_id")) as image_ids
-                                            from project_2.locations l
-                                            left join project_2.locations_location_images lli on l."location_id"=lli."location_id"
-                                            left join project_2.location_images li on li."image_id"=lli."image_id"
+                                            from ${schema}.locations l
+                                            left join ${schema}.locations_location_images lli on l."location_id"=lli."location_id"
+                                            left join ${schema}.location_images li on li."image_id"=lli."image_id"
                                             group by l."location_id";`)
         //return results
-        console.log(results);        
+        //console.log(results);        
+        console.log(results.rows.map(LocationDTOtoLocationConvertor))
         return results.rows.map(LocationDTOtoLocationConvertor)
     } catch (e) {
         //if we get an error we don't know
@@ -38,6 +37,7 @@ export async function getAllLocations(): Promise<Location[]> {
     }
 }
 
+
 //find location by ID
 export async function findLocationById(locationId:number): Promise<Location> {
     let client: PoolClient;
@@ -45,11 +45,11 @@ export async function findLocationById(locationId:number): Promise<Location> {
         //id = '1 or 1 = 1; drop table l${schema}.books cascade; select * from l${schema}.book '
         client = await connectionPool.connect()
         let results: QueryResult = await client.query(`select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
-                                            array_agg(distinct (li."image")) as images
+                                            array_agg(distinct (li."image")) as images,
                                             array_agg(distinct (li."image_id")) as image_ids
-                                            from project_2.locations l
-                                            left join project_2.locations_location_images lli on l."location_id"=lli."location_id"
-                                            left join project_2.location_images li on li."image_id"=lli."image_id"
+                                            from ${schema}.locations l
+                                            left join ${schema}.locations_location_images lli on l."location_id"=lli."location_id"
+                                            left join ${schema}.location_images li on li."image_id"=lli."image_id"
                                             where l."location_id"=$1
                                             group by l."location_id";`, [locationId])
         console.log(results.rows[0]);        
@@ -74,7 +74,7 @@ export async function addNewImage(image64: String): Promise<Image> {
     let client: PoolClient
     try {
         client = await connectionPool.connect()
-        let results: QueryResult = await client.query(`insert into project_2.location_images("image") values ($1)`, 
+        let results: QueryResult = await client.query(`insert into ${schema}.location_images("image") values ($1)`, 
                                 [image64])
         //insert the new image as a 64-bit string in order to get its ID number
         console.log(results);
@@ -108,29 +108,29 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
         }
         if (locationVisited) {
             //add a row to the users_locations table
-            await client.query(`insert into project_2.users_locations ("user_id", "location_id")
+            await client.query(`insert into  ${schema}.users_locations ("user_id", "location_id")
                                     values ($1,$2);`, [userId, locationId])
             //update the number in the places_visited column for the user
-            await client.query(`update project_2.users 
+            await client.query(`update  ${schema}.users 
                                     set "places_visited" = 
                                         (select COUNT(ul."location_id") 
-                                        from project_2.users_locations ul
+                                        from  ${schema}.users_locations ul
                                         where ul."user_id" = $1)
                                     where "user_id"=$1;`, [userId]) //can I use two $1? Or should I make it an array?
             //get the updated places_visited
             let userPlacesVisited = await client.query(`select u."places_visited" 
-                                                            from  project_2.users u 
+                                                            from   ${schema}.users u 
                                                             where u."user_id"=$1;`, [userId])
             //update the number in num_visited column for the location
-            await client.query(`update project_2.locations 
+            await client.query(`update  ${schema}.locations 
                                     set "num_visited" = 
                                         (select COUNT(ul."user_id") 
-                                        from project_2.users_locations ul
+                                        from  ${schema}.users_locations ul
                                         where ul."location_id" = $1)
                                     where "location_id"=$1;`, [locationId]) //can I use two $1? Or should I make it an array?
             //get the updated num_visited
             let locationNumVisited =  await client.query(`select l."num_visited" 
-                                                            from  project_2.locations l 
+                                                            from   ${schema}.locations l 
                                                             where l."location_id"=$1;` [locationId])
             //add the places_visited and num_visited to the returnArray
             console.log(userPlacesVisited);
@@ -140,19 +140,19 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
         }
         if (locationRating) {
             //add the rating in the users_locations table
-            await client.query(`update project_2.users_locations 
+            await client.query(`update  ${schema}.users_locations 
                                     set "rating" = $1 
                                     where "user_id" = $2 and "location_id" = $3;`, [locationRating, userId, locationId])
             //update the average rating at the end. NOTE: it returns a rounded integer, which should work well if we use start icons or something
-            await client.query(`update project_2.locations 
+            await client.query(`update  ${schema}.locations 
                                     set "avgRating" = 
                                         (select AVG(ul."rating") 
-                                        from project_2.users_locations ul
+                                        from  ${schema}.users_locations ul
                                         where ul."location_id" = $1)
                                     where "location_id" = $1;`, [locationId]) //can I use two $1? Or should I make it an array?
             //get the average rating
             let avgRating = await client.query(`select l."avg_rating" 
-                                                    from project_2.locations l 
+                                                    from  ${schema}.locations l 
                                                     where l."location_id"=$1;`, [locationId])
             //add to the returnArray
             console.log(avgRating);
@@ -161,7 +161,7 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
         } //if rating not give, just return the previous average (so the stop in the array is the same)
         if (!locationRating) {
             let oldAvgRating = await client.query(`select l."avg_rating" 
-                                                    from project_2.locations l 
+                                                    from  ${schema}.locations l 
                                                     where l."location_id"=$1;`, [locationId])
             //add to the returnArray
             console.log(oldAvgRating);
@@ -170,15 +170,15 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
         }//////////////////////////////////////////////iffy
         if (locationImage) {
             //update the image to the location_images table (path name in bucket vs 64-bit string), using the imageId
-            await client.query(`update project_2.location_images set "image" = $1
+            await client.query(`update  ${schema}.location_images set "image" = $1
                                     where "image_id" = $2`, [locationImage, imageId])
             //insert row in locations_location_images
-            await client.query(`insert into project_2.locations_location_images ("location_id", "image_id")
+            await client.query(`insert into  ${schema}.locations_location_images ("location_id", "image_id")
                                     values ($1,$2);`, [locationId, imageId])
             //get all images of a location (their ids and strings)
             let imageResults = await client.query(`select li."image_id", array_agg(distinct (li."image")) as images
-                                                        from project_2.location_images li
-                                                        left join project_2.locations_location_images lli on li."image_id"=lli."image_id"
+                                                        from  ${schema}.location_images li
+                                                        left join  ${schema}.locations_location_images lli on li."image_id"=lli."image_id"
                                                         where lli."location_id" = $1
                                                         group by li."image_id";`, [locationId])
             //make an array of Image objects using previous results
@@ -191,8 +191,8 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
         if (!locationImage) {
             //get all the images that already belong to that location
             let imageResults = await client.query(`select li."image_id", array_agg(distinct (li."image")) as images
-                                                        from project_2.location_images li
-                                                        left join project_2.locations_location_images lli on li."image_id"=lli."image_id"
+                                                        from  ${schema}.location_images li
+                                                        left join  ${schema}.locations_location_images lli on li."image_id"=lli."image_id"
                                                         where lli."location_id" = $1
                                                         group by li."image_id";`, [locationId])
             //make an array of Image objects using previous results
@@ -227,19 +227,19 @@ export async function adminUpdateLocation(updatedLocation:Location): Promise<Loc
         client = await connectionPool.connect()
         await client.query('BEGIN;') 
         if (updatedLocation.name){
-            await client.query(`update project_2.locations set "name" = $1 where "location_id" = $2`, 
+            await client.query(`update  ${schema}.locations set "name" = $1 where "location_id" = $2`, 
                                 [updatedLocation.name, updatedLocation.locationId])
         }
         if (updatedLocation.realm){
-            await client.query(`update project_2.locations set "realm" = $1 where "location_id" = $2`, 
+            await client.query(`update  ${schema}.locations set "realm" = $1 where "location_id" = $2`, 
                                 [updatedLocation.realm, updatedLocation.locationId])
         }
         if (updatedLocation.governance){
-            await client.query(`update project_2.locations set "governance" = $1 where "location_id" = $2`, 
+            await client.query(`update  ${schema}.locations set "governance" = $1 where "location_id" = $2`, 
                                 [updatedLocation.governance, updatedLocation.locationId])
         }
         if (updatedLocation.primaryPopulation){
-            await client.query(`update project_2.locations set "primary_population" = $1 where "location_id" = $2`, 
+            await client.query(`update  ${schema}.locations set "primary_population" = $1 where "location_id" = $2`, 
                                 [updatedLocation.primaryPopulation, updatedLocation.locationId])
         }
     //add that an admin can delete the record of a user visiting? 
