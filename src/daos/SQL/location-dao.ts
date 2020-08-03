@@ -5,10 +5,12 @@ import { LocationDTOtoLocationConvertor } from "../../utils/LocationDTO-to-Locat
 import { Location } from "../../models/Location";
 import { Image } from "../../models/Image";
 import { LocationNotVisitedError } from "../../errors/Location-Not-Visted-Error";
+import { ImageDTOtoImageConverter } from "../../utils/ImageDTO-to-Image-Converter";
 
 
-//const schema = process.env['LB_SCHEMA'] || 'lightlyburning_book_service' must uncomment
+//const schema = process.env['LB_SCHEMA'] || 'lightlyburning_book_service' must uncomment and match to our database
 
+//get all locations
 export async function getAllLocations(): Promise<Location[]> {
     //first, decleare a client
     let client: PoolClient;
@@ -35,6 +37,58 @@ export async function getAllLocations(): Promise<Location[]> {
     }
 }
 
+// //find all images that belong to a location(?)
+// export async function getAllLocationImages(locationId:number): Promise<Image[]>{
+//      //first, decleare a client
+//      let client: PoolClient;
+//      try {
+//          //get connection
+//          client = await connectionPool.connect()
+//          //send query - get the array of images
+//          let results: QueryResult = await client.query(`select li."image_id", li."image" 
+//                                                             from project_2.location_images li 
+//                                                             left join project_2.locations_location_images lli on li.image_id=lli.image_id 
+//                                                             where lli.location_id =$1;`, [locationId])
+//          //return results
+//          console.log(results);        
+//          return results.rows.map(ImageDTOtoImageConverter)
+//      } catch (e) {
+//          //if we get an error we don't know
+//          console.log(e)
+//          throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
+//      } finally {
+//          // we make sure client isn't undefined
+//          client && client.release()//then we release it
+//      }
+// }
+
+// //find image by id
+// export async function findImageById(imageId:number): Promise<Image> {
+//     let client: PoolClient;
+//     try{
+//         //id = '1 or 1 = 1; drop table l${schema}.books cascade; select * from l${schema}.book '
+//         client = await connectionPool.connect()
+//         let results: QueryResult = await client.query(`select * from location_images li where li.image_id = $1;`, [imageId])
+
+//         console.log(results.rows[0]);        
+//         if(results.rowCount === 0){
+//             throw new Error('NotFound')
+//         }else{
+//             return ImageDTOtoImageConverter(results.rows[0])
+//         }
+//     }catch(e){
+//         if(e.message === 'NotFound'){
+//             throw new LocationNotFoundError()
+//         }
+//         console.log(e)
+//         throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
+//     }finally{
+//         client && client.release()
+//     }
+// }
+
+
+//find location by ID
 export async function findLocationById(locationId:number): Promise<Location> {
     let client: PoolClient;
     try{
@@ -62,13 +116,34 @@ export async function findLocationById(locationId:number): Promise<Location> {
     }finally{
         client && client.release()
     }
-    
+}
+
+//add a new image
+export async function addNewImage(image64: String): Promise<Image> {
+    let client: PoolClient
+    try {
+        client = await connectionPool.connect()
+        let results: QueryResult = await client.query(`insert into project_2.location_images("image") values ($1)`, 
+                                [image64])
+        //insert the new image as a 64-bit string in order to get its ID number
+        console.log(results);
+        console.log(ImageDTOtoImageConverter(results.rows[0]))
+        //check that stuff is working the way it's supposed to
+        return ImageDTOtoImageConverter(results.rows[0])
+        //we will be using this to name file in bucket        
+    } catch(e) {
+        client && client.query('ROLLBACK;') //if a js error takes place, send it back
+        console.log(e);
+        throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
+    } finally {
+        client && client.release()
+    }
 }
 
 //is the locations router the best place for this?
 //need to get the id number of the current user!
 //return array with placesVisite, numVisited, (avg)rating, and Image array .... should it be any[]?
-export async function userUpdateLocation(locationId: number, userId: number, locationVisited: Boolean, locationRating: number, locationImage:string){
+export async function userUpdateLocation(locationId: number, userId: number, locationVisited: Boolean, locationRating: number, locationImage:string, imageId :number){
     let client: PoolClient
     try {
         client = await connectionPool.connect()
@@ -143,9 +218,9 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
             console.log(returnArray);
         }//////////////////////////////////////////////iffy
         if (locationImage) {
-            //add the image to the location_images table, get its image_id
-            let imageId = await client.query(`insert into project_2.location_images ("image")
-                                                values ('$1'); returning "image_id"`, [locationImage])
+            //update the image to the location_images table (path name in bucket vs 64-bit string), using the imageId
+            await client.query(`update project_2.location_images set "image" = $1
+                                    where "image_id" = $2`, [locationImage, imageId])
             //insert row in locations_location_images
             await client.query(`insert into project_2.locations_location_images ("location_id", "image_id")
                                     values ($1,$2);`, [locationId, imageId])
@@ -194,41 +269,38 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
     }
 }
 
+//the update endpoint for admin
+export async function adminUpdateLocation(updatedLocation:Location): Promise<Location> {
+    let client: PoolClient
+    try {
+        client = await connectionPool.connect()
+        await client.query('BEGIN;') 
+        if (updatedLocation.name){
+            await client.query(`update project_2.locations set "name" = $1 where "location_id" = $2`, 
+                                [updatedLocation.name, updatedLocation.locationId])
+        }
+        if (updatedLocation.realm){
+            await client.query(`update project_2.locations set "realm" = $1 where "location_id" = $2`, 
+                                [updatedLocation.realm, updatedLocation.locationId])
+        }
+        if (updatedLocation.governance){
+            await client.query(`update project_2.locations set "governance" = $1 where "location_id" = $2`, 
+                                [updatedLocation.governance, updatedLocation.locationId])
+        }
+        if (updatedLocation.primaryPopulation){
+            await client.query(`update project_2.locations set "primary_population" = $1 where "location_id" = $2`, 
+                                [updatedLocation.primaryPopulation, updatedLocation.locationId])
+        }
+    //add that an admin can delete the record of a user visiting? 
+    //maybe too complicated...
+    await client.query('COMMIT;') //end transaction
+    return findLocationById(updatedLocation.locationId)
+    } catch(e) {
+        client && client.query('ROLLBACK;') //if a js error takes place, send it back
+        console.log(e);
+        throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
+    } finally {
+        client && client.release()
+    }
 
-// //the update endpoint for admin
-// export async function updateLocation(updatedLocation:Location): Promise<Location> {
-//     let client: PoolClient
-//     try {
-//         client = await connectionPool.connect()
-//         await client.query('BEGIN;') 
-//         if (updatedLocation.name){
-
-//         }
-//         if (updatedLocation.realm){
-            
-//         }
-//         if (updatedLocation.governance){
-            
-//         }
-//         if (updatedLocation.primaryPopulation){
-            
-//         }
-//         if (updatedLocation.description){
-            
-//         }
-//         if (updatedLocation.rating){
-            
-//         }
-//         if (updatedLocation.name){
-            
-//         }
-//         if (updatedLocation.name){
-            
-//         }
-//     } catch(e) {
-
-//     } finally {
-//         client && client.release()
-//     }
-
-// }
+}

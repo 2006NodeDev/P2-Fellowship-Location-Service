@@ -1,4 +1,5 @@
-//DB version
+
+//DB version of location
 export class LocationDTO {
     location_id: number
 	name: string 
@@ -8,5 +9,5 @@ export class LocationDTO {
 	description: string
 	avg_rating: number 
 	num_visited:number
-	images:string[] //array? 
+	images:string[] //array of strings
 }
