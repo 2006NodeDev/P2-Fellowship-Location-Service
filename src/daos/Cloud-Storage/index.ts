@@ -2,7 +2,7 @@
 import {Storage} from '@google-cloud/storage'
 
 //bucket Name
-export const bucketName = 'project-1-rchlriedel-bucket' //CHANGE THIS FOR PROJECT 2
+export const bucketName = 'p2-fellowship' //CHANGE THIS FOR PROJECT 2
 
 //full http path to that bucket (using variable for bucket name so easy to change)
 export const bucketBaseUrl = `https://storage.googleapis.com/${bucketName}`
