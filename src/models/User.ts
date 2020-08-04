@@ -8,7 +8,7 @@ export class User {
     firstName: string; 
     lastName: string; 
     affiliation: string;
-    placesVisited: number;
+    placesVisited: number; //based on rows in locations/users joint table
     address: string;
     email: string; 
     role: string; //not null

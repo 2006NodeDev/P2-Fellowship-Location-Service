@@ -1,28 +1,15 @@
 import { Image } from "./Image"
 
+//Location model to keep track of location info
+
 export class Location {
-    locationId: number
+    locationId: number //primary key
 	name: string 
-    image:Image[] //array?
+    image:Image[] //array of image objects
 	realm:string 
 	governance:string 
 	primaryPopulation: string 
 	description: string
-	rating: number 
-    numVisited:number 
-    
-    /* for future reference 
-    bookId:number//we chose this to be the identifier
-    title:string
-    authors:string[]//we should probably update this to like a person evenetually
-    pages:number
-    chapters:number
-    publisher:string
-    publishingDate:number
-    genre:Genre[]
-    series:boolean
-    numberInSeries:number
-    ISBN:string */
-
-    
+	rating: number //the average of ratings from the locations/users joint table
+    numVisited:number //based on rows in locations/users joint table
 }
