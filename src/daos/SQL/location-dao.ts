@@ -73,11 +73,11 @@ export async function findLocationById(locationId:number): Promise<Location> {
 export async function addNewImage(image64: String): Promise<Image> {
     let client: PoolClient
     try {
-        client = await connectionPool.connect()
-        let results: QueryResult = await client.query(`insert into ${schema}.location_images("image") values ($1)`, 
-                                [image64])
+        client = await connectionPool.connect()        
+        let results: QueryResult = await client.query(`insert into ${schema}.location_images("image") 
+                                                        values ($1) returning "image_id";`, [image64])
+
         //insert the new image as a 64-bit string in order to get its ID number
-        console.log(results);
         console.log(ImageDTOtoImageConverter(results.rows[0]))
         //check that stuff is working the way it's supposed to
         return ImageDTOtoImageConverter(results.rows[0])
@@ -98,8 +98,9 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
     let client: PoolClient
     try {
         client = await connectionPool.connect()
-        let returnArray:any[]
         await client.query('BEGIN;') 
+        console.log("We are in the dao at least");
+        
         if (!locationId){
             throw new Error('Not Found')
         }
@@ -107,71 +108,73 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
             throw new Error('Not Visited')
         }
         if (locationVisited) {
-            //add a row to the users_locations table
-            await client.query(`insert into  ${schema}.users_locations ("user_id", "location_id")
-                                    values ($1,$2);`, [userId, locationId])
-            //update the number in the places_visited column for the user
-            await client.query(`update  ${schema}.users 
-                                    set "places_visited" = 
-                                        (select COUNT(ul."location_id") 
-                                        from  ${schema}.users_locations ul
-                                        where ul."user_id" = $1)
-                                    where "user_id"=$1;`, [userId]) //can I use two $1? Or should I make it an array?
-            //get the updated places_visited
-            let userPlacesVisited = await client.query(`select u."places_visited" 
-                                                            from   ${schema}.users u 
-                                                            where u."user_id"=$1;`, [userId])
-            //update the number in num_visited column for the location
-            await client.query(`update  ${schema}.locations 
-                                    set "num_visited" = 
-                                        (select COUNT(ul."user_id") 
-                                        from  ${schema}.users_locations ul
-                                        where ul."location_id" = $1)
-                                    where "location_id"=$1;`, [locationId]) //can I use two $1? Or should I make it an array?
-            //get the updated num_visited
-            let locationNumVisited =  await client.query(`select l."num_visited" 
-                                                            from   ${schema}.locations l 
-                                                            where l."location_id"=$1;` [locationId])
-            //add the places_visited and num_visited to the returnArray
-            console.log(userPlacesVisited);
-            console.log(locationNumVisited);            
-            returnArray.push(userPlacesVisited, locationNumVisited)
-            console.log(returnArray);
+            let userLocation = await client.query(`select * from  ${schema}.users_locations ul
+                                                    where ul."user_id" = $1 and ul."location_id" =$2;`, 
+                                                    [userId, locationId])
+            //check the results
+            console.log(userLocation.rows[0]);
+            //we need this so that if a user alread has visited and rated it, we can still change it
+            if (!userLocation) {
+                //add a row to the users_locations table
+                await client.query(`insert into  ${schema}.users_locations ("user_id", "location_id")
+                                                    values ($1,$2);`, [userId, locationId])
+                
+                //update the number in the places_visited column for the user            
+                //and get the updated places_visited
+                let placesVisited = await client.query(`update  ${schema}.users u 
+                                        set "places_visited" = 
+                                            (select COUNT(ul."location_id") 
+                                            from  ${schema}.users_locations ul
+                                            where ul."user_id" = $1)
+                                        where u."user_id"=$1
+                                        returning u."places_visited";`, [userId]) 
+
+                //update the number in num_visited column for the location
+                //get the updated num_visited
+                let numVisited = await client.query(`update  ${schema}.locations l
+                                        set "num_visited" = 
+                                            (select COUNT(ul."user_id") 
+                                            from  ${schema}.users_locations ul
+                                            where ul."location_id" = $1)
+                                        where l."location_id"=$1
+                                        returning l."num_visited";`, [locationId]) 
+                //check that we are getting values 
+                console.log(numVisited.rows[0]);
+                console.log(placesVisited.rows[0]);
+            }
+            
         }
-        if (locationRating) {
+        if (0 <= locationRating && locationRating <= 5) {
             //add the rating in the users_locations table
-            await client.query(`update  ${schema}.users_locations 
+            await client.query(`update  ${schema}.users_locations ul
                                     set "rating" = $1 
-                                    where "user_id" = $2 and "location_id" = $3;`, [locationRating, userId, locationId])
+                                    where ul."user_id" = $2 and ul."location_id" = $3;`, [locationRating, userId, locationId])
             //update the average rating at the end. NOTE: it returns a rounded integer, which should work well if we use start icons or something
-            await client.query(`update  ${schema}.locations 
-                                    set "avgRating" = 
+            let avgRating1 = await client.query(`update  ${schema}.locations l
+                                    set "avg_rating" = 
                                         (select AVG(ul."rating") 
                                         from  ${schema}.users_locations ul
                                         where ul."location_id" = $1)
-                                    where "location_id" = $1;`, [locationId]) //can I use two $1? Or should I make it an array?
+                                    where l."location_id" = $1
+                                    returning l."avg_rating";`, [locationId]) //can I use two $1? Or should I make it an array?
             //get the average rating
-            let avgRating = await client.query(`select l."avg_rating" 
-                                                    from  ${schema}.locations l 
-                                                    where l."location_id"=$1;`, [locationId])
-            //add to the returnArray
-            console.log(avgRating);
-            returnArray.push(avgRating)
-            console.log(returnArray);
-        } //if rating not give, just return the previous average (so the stop in the array is the same)
-        if (!locationRating) {
-            let oldAvgRating = await client.query(`select l."avg_rating" 
-                                                    from  ${schema}.locations l 
-                                                    where l."location_id"=$1;`, [locationId])
-            //add to the returnArray
-            console.log(oldAvgRating);
-            returnArray.push(oldAvgRating)
-            console.log(returnArray);
-        }//////////////////////////////////////////////iffy
+            console.log(avgRating1.rows[0]);            
+        } 
+        // not actually doing anything
+        //if rating not given, just return the previous average (so the stop in the array is the same)
+        // if (!locationRating) {
+        //     let oldAvgRating = await client.query(`select l."avg_rating" 
+        //                                             from  ${schema}.locations l 
+        //                                             where l."location_id"=$1;`, [locationId])
+        //     console.log(oldAvgRating);
+        // }
         if (locationImage) {
+            console.log("We made it to the images part");
+            
             //update the image to the location_images table (path name in bucket vs 64-bit string), using the imageId
-            await client.query(`update  ${schema}.location_images set "image" = $1
-                                    where "image_id" = $2`, [locationImage, imageId])
+            await client.query(`update  ${schema}.location_images li 
+                                    set "image" = $1
+                                    where li."image_id" = $2`, [locationImage, imageId])
             //insert row in locations_location_images
             await client.query(`insert into  ${schema}.locations_location_images ("location_id", "image_id")
                                     values ($1,$2);`, [locationId, imageId])
@@ -184,27 +187,22 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
             //make an array of Image objects using previous results
             let imageArray: Image[]= imageResults.rows
             console.log(imageArray);
-            //add to returnArray
-            returnArray.push(imageArray)
-            console.log(returnArray);
-        } //if no new image, get old ones in array
-        if (!locationImage) {
-            //get all the images that already belong to that location
-            let imageResults = await client.query(`select li."image_id", array_agg(distinct (li."image")) as images
-                                                        from  ${schema}.location_images li
-                                                        left join  ${schema}.locations_location_images lli on li."image_id"=lli."image_id"
-                                                        where lli."location_id" = $1
-                                                        group by li."image_id";`, [locationId])
-            //make an array of Image objects using previous results
-            let oldImageArray: Image[]= imageResults.rows
-            console.log(oldImageArray);
-            //add to returnArray
-            returnArray.push(oldImageArray)
-            console.log(returnArray);
-        }
+        } 
+        // not actually doing anything
+        //if no new image, get old ones in array
+        // if (!locationImage) {
+        //     //get all the images that already belong to that location
+        //     let imageResults = await client.query(`select li."image_id", array_agg(distinct (li."image")) as images
+        //                                                 from  ${schema}.location_images li
+        //                                                 left join  ${schema}.locations_location_images lli on li."image_id"=lli."image_id"
+        //                                                 where lli."location_id" = $1
+        //                                                 group by li."image_id";`, [locationId])
+        //     //make an array of Image objects using previous results
+        //     let oldImageArray: Image[]= imageResults.rows
+        //     console.log(oldImageArray);
+        // }
         await client.query('COMMIT;') //end transaction
-        console.log(returnArray);
-        //return returnArray;  let's actually not return anything
+        //we are not returning anything!
     } catch(e) {
         client && client.query('ROLLBACK;') 
         if (e.message === "Not Found"){

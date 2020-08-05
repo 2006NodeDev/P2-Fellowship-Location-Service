@@ -41,10 +41,14 @@ locationRouter.get('/:locationId', async (req: Request, res: Response, next:Next
 
 //PATCH user update 
 locationRouter.patch('/user/update/:locationId', async (req:any, res:Response, next:NextFunction) => {
-    let locationId = req.params
+    let { locationId }= req.params
     let currentUserId = req.user.userId
     //make sure they are number below
+    console.log(locationId);
 
+    console.log(+locationId);
+    console.log(+currentUserId);
+    
     let {visited, rating, image} = req.body
 
     if(!locationId || isNaN(+locationId)) { 
@@ -53,6 +57,8 @@ locationRouter.patch('/user/update/:locationId', async (req:any, res:Response, n
         next (new LocationNotVisitedError)
     } else {
         try {
+            console.log("no problems yet");
+            
            //this is going to be the array returned (with placesVisited, numVisited, (avg)rating, and Images[])
             let updatesMade = await userUpdateLocationService(+locationId, +currentUserId, visited, rating, image)
             console.log(updatesMade);
