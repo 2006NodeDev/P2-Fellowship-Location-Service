@@ -1,5 +1,5 @@
 import { userServiceBaseClient } from ".";
-import { User } from "../models/User";
+import { User } from "../../models/User";
 
 //where are we getting the number from though? and do we need the token stuff?
 export const userServiceGetUserById = async (userId:number, token:string) => {

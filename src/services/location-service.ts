@@ -44,9 +44,15 @@ export async function userUpdateLocationService(locationId: number, userId: numb
             return updatedLocation
             //this way we are updating the location and getting the updated location to send back to the front end
         } else {
+            console.log("hello");
+            
             await userUpdateLocation(locationId, userId, locationVisited, locationRating, null, null)
+            console.log("greetings");
+
             //we need to save the updated location data to the sql database (making sure to update row in location_images table to have the path, not the 64-bit data)
             let updatedLocation = await findLocationById(locationId)
+            console.log("we've come so far");
+            
             console.log(updatedLocation); //check that it's been updating/returning the right thing
             return updatedLocation
             //this way we are updating the location and getting the updated location to send back to the front end
