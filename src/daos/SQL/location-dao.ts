@@ -108,7 +108,7 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
         }
         if (locationVisited) {
             //add a row to the users_locations table
-            await client.query(`insert into  ${schema}.users_locations ("user_id", "location_id")
+            await client.query(`insert into ${schema}.users_locations ("user_id", "location_id")
                                     values ($1,$2);`, [userId, locationId])
             //update the number in the places_visited column for the user
             await client.query(`update  ${schema}.users 
