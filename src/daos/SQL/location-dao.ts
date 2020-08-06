@@ -99,7 +99,6 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
     try {
         client = await connectionPool.connect()
         await client.query('BEGIN;') 
-        console.log("We are in the dao at least");
         
         if (!locationId){
             throw new Error('Not Found')
@@ -160,18 +159,9 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
             //get the average rating
             console.log(avgRating1.rows[0]);            
         } 
-        // not actually doing anything
-        //if rating not given, just return the previous average (so the stop in the array is the same)
-        // if (!locationRating) {
-        //     let oldAvgRating = await client.query(`select l."avg_rating" 
-        //                                             from  ${schema}.locations l 
-        //                                             where l."location_id"=$1;`, [locationId])
-        //     console.log(oldAvgRating);
-        // }
+      
         if (locationImage) {
-            console.log("We made it to the images part");
-            
-            //update the image to the location_images table (path name in bucket vs 64-bit string), using the imageId
+           //update the image to the location_images table (path name in bucket vs 64-bit string), using the imageId
             await client.query(`update  ${schema}.location_images li 
                                     set "image" = $1
                                     where li."image_id" = $2`, [locationImage, imageId])
@@ -188,19 +178,7 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
             let imageArray: Image[]= imageResults.rows
             console.log(imageArray);
         } 
-        // not actually doing anything
-        //if no new image, get old ones in array
-        // if (!locationImage) {
-        //     //get all the images that already belong to that location
-        //     let imageResults = await client.query(`select li."image_id", array_agg(distinct (li."image")) as images
-        //                                                 from  ${schema}.location_images li
-        //                                                 left join  ${schema}.locations_location_images lli on li."image_id"=lli."image_id"
-        //                                                 where lli."location_id" = $1
-        //                                                 group by li."image_id";`, [locationId])
-        //     //make an array of Image objects using previous results
-        //     let oldImageArray: Image[]= imageResults.rows
-        //     console.log(oldImageArray);
-        // }
+        
         await client.query('COMMIT;') //end transaction
         //we are not returning anything!
     } catch(e) {

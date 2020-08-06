@@ -99,68 +99,68 @@ insert into locations_location_images("location_id", "image_id")
 --select * from locations_location_images;
 
 --get all locations
-select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
-	array_agg(distinct (li."image")) as images
-	from project_2.locations l
-	left join project_2.locations_location_images lli on l."location_id"=lli."location_id"
-	left join project_2.location_images li on li."image_id"=lli."image_id"
-	group by l."location_id";
+-- select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
+-- 	array_agg(distinct (li."image")) as images
+-- 	from project_2.locations l
+-- 	left join project_2.locations_location_images lli on l."location_id"=lli."location_id"
+-- 	left join project_2.location_images li on li."image_id"=lli."image_id"
+-- 	group by l."location_id";
 
---get location by ID
-select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
-	array_agg(distinct (li."image")) as images
-	from project_2.locations l
-	left join project_2.locations_location_images lli on l."location_id"=lli."location_id"
-	left join project_2.location_images li on li."image_id"=lli."image_id"
-	where l."location_id"=2
-	group by l."location_id";
+-- --get location by ID
+-- select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
+-- 	array_agg(distinct (li."image")) as images
+-- 	from project_2.locations l
+-- 	left join project_2.locations_location_images lli on l."location_id"=lli."location_id"
+-- 	left join project_2.location_images li on li."image_id"=lli."image_id"
+-- 	where l."location_id"=2
+-- 	group by l."location_id";
 
---update who has visited the location and what the rating is 
---first, add a row in users_locations
-insert into project_2.users_locations ("user_id", "location_id")
-	values (5,1);
-		--select * from project_2.users_locations where "user_id" = 5 and "location_id" = 1;
---update the user's places_visited
-update project_2.users 
-	set "places_visited" = 
-		(select COUNT(ul."location_id") 
-		from project_2.users_locations ul
-		where ul."user_id" = 3)
-	where "user_id"=3;
---select places_visted to return;
-select u."places_visited" from  project_2.users u where u."user_id"=3;
+-- --update who has visited the location and what the rating is 
+-- --first, add a row in users_locations
+-- insert into project_2.users_locations ("user_id", "location_id")
+-- 	values (5,1);
+-- 		--select * from project_2.users_locations where "user_id" = 5 and "location_id" = 1;
+-- --update the user's places_visited
+-- update project_2.users 
+-- 	set "places_visited" = 
+-- 		(select COUNT(ul."location_id") 
+-- 		from project_2.users_locations ul
+-- 		where ul."user_id" = 3)
+-- 	where "user_id"=3;
+-- --select places_visted to return;
+-- select u."places_visited" from  project_2.users u where u."user_id"=3;
 
---update the location's num_visited
-update project_2.locations 
-	set "num_visited" = 
-		(select COUNT(ul."user_id") 
-		from project_2.users_locations ul
-		where ul."location_id" = 3)
-	where "location_id"=3;
---select num_visited to be returned
-select l."num_visited" from  project_2.locations l where l."location_id"=3;
+-- --update the location's num_visited
+-- update project_2.locations 
+-- 	set "num_visited" = 
+-- 		(select COUNT(ul."user_id") 
+-- 		from project_2.users_locations ul
+-- 		where ul."location_id" = 3)
+-- 	where "location_id"=3;
+-- --select num_visited to be returned
+-- select l."num_visited" from  project_2.locations l where l."location_id"=3;
 
---if the user gives a rating, add the rating to users_locations
-update project_2.users_locations set "rating" = 3 where "user_id" = 5 and "location_id" = 1;
-		--select * from project_2.users_locations where "user_id" = 5 and "location_id" = 1; 
---then, update the average rating on the locations
-update project_2.locations 
-	set "avg_rating" = 
-		(select AVG(ul."rating") 
-		FROM project_2.users_locations ul
-		WHERE ul."location_id" = 3)
-	where "location_id" = 3;
---select avg_rating from project_2.locations to be returned
-select l."avg_rating" from project_2.locations l where l."location_id"=3;
+-- --if the user gives a rating, add the rating to users_locations
+-- update project_2.users_locations set "rating" = 3 where "user_id" = 5 and "location_id" = 1;
+-- 		--select * from project_2.users_locations where "user_id" = 5 and "location_id" = 1; 
+-- --then, update the average rating on the locations
+-- update project_2.locations 
+-- 	set "avg_rating" = 
+-- 		(select AVG(ul."rating") 
+-- 		FROM project_2.users_locations ul
+-- 		WHERE ul."location_id" = 3)
+-- 	where "location_id" = 3;
+-- --select avg_rating from project_2.locations to be returned
+-- select l."avg_rating" from project_2.locations l where l."location_id"=3;
 		
---add a new photo of the location
-insert into project_2.location_images ("image")
-	values ('image5') returning "image_id";
-insert into project_2.locations_location_images ("location_id", "image_id")
-	values (3,4);
---to return the array of images for the location
-select li."image_id", array_agg(distinct (li."image")) as images
-	from project_2.location_images li
-	left join project_2.locations_location_images lli on li."image_id"=lli."image_id"
-	where lli."location_id" = 2
-	group by li."image_id";
+-- --add a new photo of the location
+-- insert into project_2.location_images ("image")
+-- 	values ('image5') returning "image_id";
+-- insert into project_2.locations_location_images ("location_id", "image_id")
+-- 	values (3,4);
+-- --to return the array of images for the location
+-- select li."image_id", array_agg(distinct (li."image")) as images
+-- 	from project_2.location_images li
+-- 	left join project_2.locations_location_images lli on li."image_id"=lli."image_id"
+-- 	where lli."location_id" = 2
+-- 	group by li."image_id";
