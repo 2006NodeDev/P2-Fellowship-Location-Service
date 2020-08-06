@@ -41,10 +41,12 @@ locationRouter.get('/:locationId', async (req: Request, res: Response, next:Next
 
 //PATCH user update 
 locationRouter.patch('/user/update/:locationId', async (req:any, res:Response, next:NextFunction) => {
-    let locationId = req.params
+    let { locationId }= req.params
     let currentUserId = req.user.userId
-    //make sure they are number below
-
+    //make sure they are numbers below
+    console.log(+locationId);
+    console.log(+currentUserId);
+    
     let {visited, rating, image} = req.body
 
     if(!locationId || isNaN(+locationId)) { 
@@ -56,7 +58,7 @@ locationRouter.patch('/user/update/:locationId', async (req:any, res:Response, n
            //this is going to be the array returned (with placesVisited, numVisited, (avg)rating, and Images[])
             let updatesMade = await userUpdateLocationService(+locationId, +currentUserId, visited, rating, image)
             console.log(updatesMade);
-            
+            //check
             res.status(200).send("Your contribution has been taken into consideration")
             //what should we send as a response? 
             //do we need to send requests to updateUser and updateLocations with the new info??
@@ -70,7 +72,7 @@ locationRouter.patch('/user/update/:locationId', async (req:any, res:Response, n
 })
 
 
-//possible patch? for admin
+//PATH for admin
 locationRouter.patch('/update/:locationId', async (req:Request, res:Response, next:NextFunction) => {
     let {locationId} = req.params
     let currentLocationId = +locationId
@@ -80,14 +82,12 @@ locationRouter.patch('/update/:locationId', async (req:Request, res:Response, ne
         governance,
         primaryPopulation, 
         description} = req.body
-    //not sure what we sould do for images (to delete, etc.)
+    //here, admins only update the fields above. Otherwise, they can go to the other update component to act as a user
     console.log(req.body)
     if(!currentLocationId || isNaN(currentLocationId)) { 
        next (new LocationIdNumberNeededError)    
     } else {
-       //updated the num_visited and places_visited for locations and users resp.
-       //add a photo to the array 
-       //add a rating, then upate the locations rating average    
+        
         let updatedLocation:Location = { 
             locationId: currentLocationId, 
             name,
@@ -105,6 +105,8 @@ locationRouter.patch('/update/:locationId', async (req:Request, res:Response, ne
         updatedLocation.primaryPopulation = primaryPopulation || undefined
         try {
             let updatedLocationResults = await adminUpdateLocationService(updatedLocation)
+            console.log(updatedLocationResults);
+            //check
             res.json(updatedLocationResults)
         } catch (e) {
             next(e)
