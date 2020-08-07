@@ -3,7 +3,7 @@
 const mockRequest = ()=>{
     return {
         //we just need the user object
-        user:undefined
+        location:undefined
     }
 }
 
@@ -11,21 +11,27 @@ const mockRequest = ()=>{
 const mockResponse =() => {
     let res:any = {} //the res object needs status and send
     res.status = jest.fn().mockReturnValue(res)
+   
+    res.locationId= jest.fn().mockReturnValue(res),
+    res.userId =jest.fn().mockReturnValue(res), 
+    res.locationVisited=jest.fn().mockReturnValue(res), 
+    res.locationRating=jest.fn().mockReturnValue(res), 
+    res.locationImage=jest.fn().mockReturnValue(res), 
     res.send = jest.fn().mockReturnValue(res)
     return res
 }
 
 import { userUpdateLocationService } from "./location-service"
 
-describe('userUpdateLocationService', ()=>{
+describe('userUpdateLocationService', async()=>{
 
     //put these in params?
+    
     let locationId: number
     let userId: number 
     let locationVisited: boolean
     let locationRating: number
     let locationImage: string
-
     //we still need these, but is this how we should declare them?
     let req;
     let res;
@@ -35,6 +41,11 @@ describe('userUpdateLocationService', ()=>{
     beforeEach(()=>{
         req = mockRequest()
         res = mockResponse()
+        locationId = mockResponse()
+        userId = mockResponse()
+        locationVisited = mockResponse()
+        locationRating = mockResponse()
+        locationImage = mockResponse()
         next = jest.fn()
     })
 
@@ -48,6 +59,11 @@ describe('userUpdateLocationService', ()=>{
     })
     //this seems like more of a dao test...
     it('Should not allow update if location was not visited', ()=>{
+        req.location = {//set up the user object
+            "visited": false,
+            "rating": 0,
+            "image": ""
+        }
         //set variables to pass in?
         userUpdateLocationService(locationId, userId, locationVisited, locationRating, locationImage)
         expect(res.status).toBeCalledWith(404)
