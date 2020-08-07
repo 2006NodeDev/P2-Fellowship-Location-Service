@@ -70,7 +70,8 @@ insert into locations("name", "realm", "governance", "primary_population", "desc
 		   ('The Mines of Moria', 'Khazad-dum (Misty Mountains)', null, 'Goblins', 'Once a thriving dwarf city, it has since been overrun with goblins. Oh and a Balrog.', null, null),
 		   ('Edoras', 'Rohan', 'King Theoden', 'Humans', 'The capital of Rohan', null, null),
 		   ('Isengard', ' Nan Curunir', 'Saruman', 'Wizards', 'Not a great place anymore.', null, null);
---select * from locations;		  
+--select * from locations;	
+	  
 insert into users_locations ("user_id", "location_id", "rating")
 	values (1,1,5),
 		   (1,2,1),

@@ -2,7 +2,6 @@ import { LocationDTO } from "../dtos/location-dto";
 import { Location } from "../models/Location";
 import { Image } from "../models/Image";
 
-
 export function LocationDTOtoLocationConvertor( dto:LocationDTO):Location{
 
     let image:Image[]=[];
@@ -21,7 +20,9 @@ export function LocationDTOtoLocationConvertor( dto:LocationDTO):Location{
         primaryPopulation:dto.primary_population,
         description: dto.description,
         rating:  dto.avg_rating,
-        numVisited:dto.num_visited 
+        numVisited:dto.num_visited,
+        latitude: dto.lat,
+        longitude: dto.lng
 
         /*ISBN: dto.ISBN.toString(),
         authors:dto.authors,

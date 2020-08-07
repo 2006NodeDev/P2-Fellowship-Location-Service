@@ -16,7 +16,7 @@ export async function getAllLocations(): Promise<Location[]> {
         //get connection
         client = await connectionPool.connect()
         //send query
-        let results: QueryResult = await client.query(`select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
+        let results: QueryResult = await client.query(`select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", l."lat", l."lng",
                                             array_agg(distinct (li."image")) as images,
                                             array_agg(distinct (li."image_id")) as image_ids
                                             from ${schema}.locations l
@@ -42,7 +42,7 @@ export async function findLocationById(locationId:number): Promise<Location> {
     try{
         //id = '1 or 1 = 1; drop table l${schema}.books cascade; select * from l${schema}.book '
         client = await connectionPool.connect()
-        let results: QueryResult = await client.query(`select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
+        let results: QueryResult = await client.query(`select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", l."lat", l."lng",
                                             array_agg(distinct (li."image")) as images,
                                             array_agg(distinct (li."image_id")) as image_ids
                                             from ${schema}.locations l
