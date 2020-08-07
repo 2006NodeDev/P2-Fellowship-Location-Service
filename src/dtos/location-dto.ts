@@ -9,6 +9,8 @@ export class LocationDTO {
 	description: string
 	avg_rating: number 
 	num_visited:number
+	lat:number
+	lng:number
 	images:string[] //array of strings
 	image_ids:number[]
 }
