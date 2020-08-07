@@ -36,8 +36,6 @@ export async function getAllLocations(): Promise<Location[]> {
         client && client.release()//then we release it
     }
 }
-
-
 //find location by ID
 export async function findLocationById(locationId:number): Promise<Location> {
     let client: PoolClient;
