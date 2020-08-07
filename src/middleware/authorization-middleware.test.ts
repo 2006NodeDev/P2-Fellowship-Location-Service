@@ -12,10 +12,10 @@ const mockResponse =() => {
 }
 
 
-import { authenticationMiddleware } from './authentication-middleware'
+import { authorizationMiddleware } from './authorization-middleware'
 
 
-describe('authenticationMiddleware', ()=>{
+describe('authorizationMiddleware ', ()=>{
     
     let req;
     let res;
@@ -30,7 +30,7 @@ describe('authenticationMiddleware', ()=>{
 
     it('Should not allow someone who is not logged in through', ()=>{
         //calls the middleware with a non existenent user
-        authenticationMiddleware(req, res, next)
+        authorizationMiddleware (req)
         expect(res.status).toBeCalledWith(401)
         expect(res.send).toBeCalledWith('Please Login')
         expect(next).not.toBeCalled()
@@ -42,7 +42,7 @@ describe('authenticationMiddleware', ()=>{
             role:'Admin'
         }
         console.log = jest.fn()//mock console.log WITH LOGGER
-        authenticationMiddleware(req,res,next)
+        authorizationMiddleware (req)
         expect(res.status).not.toBeCalled()
         expect(res.send).not.toBeCalled()
         expect(next).toBeCalled()
