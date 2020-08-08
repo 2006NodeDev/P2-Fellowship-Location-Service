@@ -36,12 +36,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userUpdateLocation = exports.findLocationById = exports.getAllLocations = void 0;
+exports.adminUpdateLocation = exports.userUpdateLocation = exports.addNewImage = exports.findLocationById = exports.getAllLocations = void 0;
 var _1 = require(".");
 var Location_Not_Found_Error_1 = require("../../errors/Location-Not-Found-Error");
 var LocationDTO_to_Location_converter_1 = require("../../utils/LocationDTO-to-Location-converter");
 var Location_Not_Visted_Error_1 = require("../../errors/Location-Not-Visted-Error");
-//const schema = process.env['LB_SCHEMA'] || 'lightlyburning_book_service' must uncomment
+var ImageDTO_to_Image_Converter_1 = require("../../utils/ImageDTO-to-Image-Converter");
+var schema = process.env['P2_SCHEMA'] || 'project_2_location_service';
 function getAllLocations() {
     return __awaiter(this, void 0, void 0, function () {
         var client, results, e_1;
@@ -55,13 +56,15 @@ function getAllLocations() {
                 case 1:
                     //get connection
                     client = _a.sent();
-                    return [4 /*yield*/, client.query("select l.\"location_id\", l.\"name\", l.\"realm\", l.\"governance\", l.\"primary_population\", l.\"description\", l.\"avg_rating\", l.\"num_visited\", \n                                            array_agg(distinct (li.\"image\")) as images\n                                            from project_2.locations l\n                                            left join project_2.locations_location_images lli on l.\"location_id\"=lli.\"location_id\"\n                                            left join project_2.location_images li on li.\"image_id\"=lli.\"image_id\"\n                                            group by l.\"location_id\";")
+                    return [4 /*yield*/, client.query("select l.\"location_id\", l.\"name\", l.\"realm\", l.\"governance\", l.\"primary_population\", l.\"description\", l.\"avg_rating\", l.\"num_visited\", l.\"lat\", l.\"lng\",\n                                            array_agg(distinct (li.\"image\")) as images,\n                                            array_agg(distinct (li.\"image_id\")) as image_ids\n                                            from " + schema + ".locations l\n                                            left join " + schema + ".locations_location_images lli on l.\"location_id\"=lli.\"location_id\"\n                                            left join " + schema + ".location_images li on li.\"image_id\"=lli.\"image_id\"\n                                            group by l.\"location_id\";")
                         //return results
+                        //console.log(results);        
                     ];
                 case 2:
                     results = _a.sent();
                     //return results
-                    console.log(results);
+                    //console.log(results);        
+                    console.log(results.rows.map(LocationDTO_to_Location_converter_1.LocationDTOtoLocationConvertor));
                     return [2 /*return*/, results.rows.map(LocationDTO_to_Location_converter_1.LocationDTOtoLocationConvertor)];
                 case 3:
                     e_1 = _a.sent();
@@ -78,6 +81,7 @@ function getAllLocations() {
     });
 }
 exports.getAllLocations = getAllLocations;
+//find location by ID
 function findLocationById(locationId) {
     return __awaiter(this, void 0, void 0, function () {
         var client, results, e_2;
@@ -89,7 +93,7 @@ function findLocationById(locationId) {
                 case 1:
                     //id = '1 or 1 = 1; drop table l${schema}.books cascade; select * from l${schema}.book '
                     client = _a.sent();
-                    return [4 /*yield*/, client.query("select l.\"location_id\", l.\"name\", l.\"realm\", l.\"governance\", l.\"primary_population\", l.\"description\", l.\"avg_rating\", l.\"num_visited\", \n                                            array_agg(distinct (li.\"image\")) as images\n                                            from project_2.locations l\n                                            left join project_2.locations_location_images lli on l.\"location_id\"=lli.\"location_id\"\n                                            left join project_2.location_images li on li.\"image_id\"=lli.\"image_id\"\n                                            where l.\"location_id\"=$1\n                                            group by l.\"location_id\";", [locationId])];
+                    return [4 /*yield*/, client.query("select l.\"location_id\", l.\"name\", l.\"realm\", l.\"governance\", l.\"primary_population\", l.\"description\", l.\"avg_rating\", l.\"num_visited\", l.\"lat\", l.\"lng\",\n                                            array_agg(distinct (li.\"image\")) as images,\n                                            array_agg(distinct (li.\"image_id\")) as image_ids\n                                            from " + schema + ".locations l\n                                            left join " + schema + ".locations_location_images lli on l.\"location_id\"=lli.\"location_id\"\n                                            left join " + schema + ".location_images li on li.\"image_id\"=lli.\"image_id\"\n                                            where l.\"location_id\"=$1\n                                            group by l.\"location_id\";", [locationId])];
                 case 2:
                     results = _a.sent();
                     console.log(results.rows[0]);
@@ -116,20 +120,55 @@ function findLocationById(locationId) {
     });
 }
 exports.findLocationById = findLocationById;
-//is the locations router the best place for this?
-//need to get the id number of the current user!
-//return array with placesVisite, numVisited, (avg)rating, and Image array .... should it be any[]?
-function userUpdateLocation(locationId, userId, locationVisited, locationRating, locationImage) {
+//add a new image
+function addNewImage(image64) {
     return __awaiter(this, void 0, void 0, function () {
-        var client, returnArray, userPlacesVisited, locationNumVisited, avgRating, oldAvgRating, imageId, imageResults, imageArray, imageResults, oldImageArray, e_3;
+        var client, results, e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 22, 23, 24]);
+                    _a.trys.push([0, 3, 4, 5]);
                     return [4 /*yield*/, _1.connectionPool.connect()];
                 case 1:
                     client = _a.sent();
-                    returnArray = void 0;
+                    return [4 /*yield*/, client.query("insert into " + schema + ".location_images(\"image\") \n                                                        values ($1) returning \"image_id\";", [image64])
+                        //insert the new image as a 64-bit string in order to get its ID number
+                    ];
+                case 2:
+                    results = _a.sent();
+                    //insert the new image as a 64-bit string in order to get its ID number
+                    console.log(ImageDTO_to_Image_Converter_1.ImageDTOtoImageConverter(results.rows[0]));
+                    //check that stuff is working the way it's supposed to
+                    return [2 /*return*/, ImageDTO_to_Image_Converter_1.ImageDTOtoImageConverter(results.rows[0])
+                        //we will be using this to name file in bucket        
+                    ];
+                case 3:
+                    e_3 = _a.sent();
+                    client && client.query('ROLLBACK;'); //if a js error takes place, send it back
+                    console.log(e_3);
+                    throw new Error("This error can't be handled, like the way the ring can't be handled by anyone but Frodo");
+                case 4:
+                    client && client.release();
+                    return [7 /*endfinally*/];
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.addNewImage = addNewImage;
+//is the locations router the best place for this?
+//need to get the id number of the current user!
+//return array with placesVisite, numVisited, (avg)rating, and Image array .... should it be any[]?
+function userUpdateLocation(locationId, userId, locationVisited, locationRating, locationImage, imageId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var client, userLocation, placesVisited, numVisited, avgRating1, imageResults, imageArray, e_4;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 16, 17, 18]);
+                    return [4 /*yield*/, _1.connectionPool.connect()];
+                case 1:
+                    client = _a.sent();
                     return [4 /*yield*/, client.query('BEGIN;')];
                 case 2:
                     _a.sent();
@@ -139,170 +178,164 @@ function userUpdateLocation(locationId, userId, locationVisited, locationRating,
                     if (locationVisited === false) { //this might be extra, since checked in router (and to be checked in frontend too), but may as well keep it in
                         throw new Error('Not Visited');
                     }
-                    if (!locationVisited) return [3 /*break*/, 8];
-                    //add a row to the users_locations table
-                    return [4 /*yield*/, client.query("insert into project_2.users_locations (\"user_id\", \"location_id\")\n                                    values ($1,$2);", [userId, locationId])
-                        //update the number in the places_visited column for the user
+                    if (!locationVisited) return [3 /*break*/, 7];
+                    return [4 /*yield*/, client.query("select * from  " + schema + ".users_locations ul\n                                                    where ul.\"user_id\" = $1 and ul.\"location_id\" =$2;", [userId, locationId])
+                        //check the results
                     ];
                 case 3:
+                    userLocation = _a.sent();
+                    //check the results
+                    console.log(userLocation.rows[0]);
+                    if (!!userLocation) return [3 /*break*/, 7];
+                    //add a row to the users_locations table
+                    return [4 /*yield*/, client.query("insert into  " + schema + ".users_locations (\"user_id\", \"location_id\")\n                                                    values ($1,$2);", [userId, locationId])
+                        //update the number in the places_visited column for the user            
+                        //and get the updated places_visited
+                    ];
+                case 4:
                     //add a row to the users_locations table
                     _a.sent();
-                    //update the number in the places_visited column for the user
-                    return [4 /*yield*/, client.query("update project_2.users \n                                    set \"places_visited\" = \n                                        (select COUNT(ul.\"location_id\") \n                                        from project_2.users_locations ul\n                                        where ul.\"user_id\" = $1)\n                                    where \"user_id\"=$1;", [userId])
-                        //get the updated places_visited
-                    ]; //can I use two $1? Or should I make it an array?
-                case 4:
-                    //update the number in the places_visited column for the user
-                    _a.sent(); //can I use two $1? Or should I make it an array?
-                    return [4 /*yield*/, client.query("select u.\"places_visited\" \n                                                            from  project_2.users u \n                                                            where u.\"user_id\"=$1;", [userId])
+                    return [4 /*yield*/, client.query("update  " + schema + ".users u \n                                        set \"places_visited\" = \n                                            (select COUNT(ul.\"location_id\") \n                                            from  " + schema + ".users_locations ul\n                                            where ul.\"user_id\" = $1)\n                                        where u.\"user_id\"=$1\n                                        returning u.\"places_visited\";", [userId])
                         //update the number in num_visited column for the location
+                        //get the updated num_visited
                     ];
                 case 5:
-                    userPlacesVisited = _a.sent();
-                    //update the number in num_visited column for the location
-                    return [4 /*yield*/, client.query("update project_2.locations \n                                    set \"num_visited\" = \n                                        (select COUNT(ul.\"user_id\") \n                                        from project_2.users_locations ul\n                                        where ul.\"location_id\" = $1)\n                                    where \"location_id\"=$1;", [locationId])
-                        //get the updated num_visited
-                    ]; //can I use two $1? Or should I make it an array?
-                case 6:
-                    //update the number in num_visited column for the location
-                    _a.sent(); //can I use two $1? Or should I make it an array?
-                    return [4 /*yield*/, client.query("select l.\"num_visited\" \n                                                            from  project_2.locations l \n                                                            where l.\"location_id\"=$1;"[locationId])
-                        //add the places_visited and num_visited to the returnArray
+                    placesVisited = _a.sent();
+                    return [4 /*yield*/, client.query("update  " + schema + ".locations l\n                                        set \"num_visited\" = \n                                            (select COUNT(ul.\"user_id\") \n                                            from  " + schema + ".users_locations ul\n                                            where ul.\"location_id\" = $1)\n                                        where l.\"location_id\"=$1\n                                        returning l.\"num_visited\";", [locationId])
+                        //check that we are getting values 
                     ];
+                case 6:
+                    numVisited = _a.sent();
+                    //check that we are getting values 
+                    console.log(numVisited.rows[0]);
+                    console.log(placesVisited.rows[0]);
+                    _a.label = 7;
                 case 7:
-                    locationNumVisited = _a.sent();
-                    //add the places_visited and num_visited to the returnArray
-                    console.log(userPlacesVisited);
-                    console.log(locationNumVisited);
-                    returnArray.push(userPlacesVisited, locationNumVisited);
-                    console.log(returnArray);
-                    _a.label = 8;
-                case 8:
-                    if (!locationRating) return [3 /*break*/, 12];
+                    if (!(0 <= locationRating && locationRating <= 5)) return [3 /*break*/, 10];
                     //add the rating in the users_locations table
-                    return [4 /*yield*/, client.query("update project_2.users_locations \n                                    set \"rating\" = $1 \n                                    where \"user_id\" = $2 and \"location_id\" = $3;", [locationRating, userId, locationId])
+                    return [4 /*yield*/, client.query("update  " + schema + ".users_locations ul\n                                    set \"rating\" = $1 \n                                    where ul.\"user_id\" = $2 and ul.\"location_id\" = $3;", [locationRating, userId, locationId])
                         //update the average rating at the end. NOTE: it returns a rounded integer, which should work well if we use start icons or something
                     ];
-                case 9:
+                case 8:
                     //add the rating in the users_locations table
                     _a.sent();
-                    //update the average rating at the end. NOTE: it returns a rounded integer, which should work well if we use start icons or something
-                    return [4 /*yield*/, client.query("update project_2.locations \n                                    set \"avgRating\" = \n                                        (select AVG(ul.\"rating\") \n                                        from project_2.users_locations ul\n                                        where ul.\"location_id\" = $1)\n                                    where \"location_id\" = $1;", [locationId])
+                    return [4 /*yield*/, client.query("update  " + schema + ".locations l\n                                    set \"avg_rating\" = \n                                        (select AVG(ul.\"rating\") \n                                        from  " + schema + ".users_locations ul\n                                        where ul.\"location_id\" = $1)\n                                    where l.\"location_id\" = $1\n                                    returning l.\"avg_rating\";", [locationId])
                         //get the average rating
                     ]; //can I use two $1? Or should I make it an array?
+                case 9:
+                    avgRating1 = _a.sent() //can I use two $1? Or should I make it an array?
+                    ;
+                    //get the average rating
+                    console.log(avgRating1.rows[0]);
+                    _a.label = 10;
                 case 10:
-                    //update the average rating at the end. NOTE: it returns a rounded integer, which should work well if we use start icons or something
-                    _a.sent(); //can I use two $1? Or should I make it an array?
-                    return [4 /*yield*/, client.query("select l.\"avg_rating\" \n                                                    from project_2.locations l \n                                                    where l.\"location_id\"=$1;", [locationId])
-                        //add to the returnArray
-                    ];
-                case 11:
-                    avgRating = _a.sent();
-                    //add to the returnArray
-                    console.log(avgRating);
-                    returnArray.push(avgRating);
-                    console.log(returnArray);
-                    _a.label = 12;
-                case 12:
-                    if (!!locationRating) return [3 /*break*/, 14];
-                    return [4 /*yield*/, client.query("select l.\"avg_rating\" \n                                                    from project_2.locations l \n                                                    where l.\"location_id\"=$1;", [locationId])
-                        //add to the returnArray
-                    ];
-                case 13:
-                    oldAvgRating = _a.sent();
-                    //add to the returnArray
-                    console.log(oldAvgRating);
-                    returnArray.push(oldAvgRating);
-                    console.log(returnArray);
-                    _a.label = 14;
-                case 14:
-                    if (!locationImage) return [3 /*break*/, 18];
-                    return [4 /*yield*/, client.query("insert into project_2.location_images (\"image\")\n                                                values ('$1'); returning \"image_id\"", [locationImage])
+                    if (!locationImage) return [3 /*break*/, 14];
+                    //update the image to the location_images table (path name in bucket vs 64-bit string), using the imageId
+                    return [4 /*yield*/, client.query("update  " + schema + ".location_images li \n                                    set \"image\" = $1\n                                    where li.\"image_id\" = $2", [locationImage, imageId])
                         //insert row in locations_location_images
                     ];
-                case 15:
-                    imageId = _a.sent();
+                case 11:
+                    //update the image to the location_images table (path name in bucket vs 64-bit string), using the imageId
+                    _a.sent();
                     //insert row in locations_location_images
-                    return [4 /*yield*/, client.query("insert into project_2.locations_location_images (\"location_id\", \"image_id\")\n                                    values ($1,$2);", [locationId, imageId])
+                    return [4 /*yield*/, client.query("insert into  " + schema + ".locations_location_images (\"location_id\", \"image_id\")\n                                    values ($1,$2);", [locationId, imageId])
                         //get all images of a location (their ids and strings)
                     ];
-                case 16:
+                case 12:
                     //insert row in locations_location_images
                     _a.sent();
-                    return [4 /*yield*/, client.query("select li.\"image_id\", array_agg(distinct (li.\"image\")) as images\n                                                        from project_2.location_images li\n                                                        left join project_2.locations_location_images lli on li.\"image_id\"=lli.\"image_id\"\n                                                        where lli.\"location_id\" = $1\n                                                        group by li.\"image_id\";", [locationId])
+                    return [4 /*yield*/, client.query("select li.\"image_id\", array_agg(distinct (li.\"image\")) as images\n                                                        from  " + schema + ".location_images li\n                                                        left join  " + schema + ".locations_location_images lli on li.\"image_id\"=lli.\"image_id\"\n                                                        where lli.\"location_id\" = $1\n                                                        group by li.\"image_id\";", [locationId])
                         //make an array of Image objects using previous results
                     ];
-                case 17:
+                case 13:
                     imageResults = _a.sent();
                     imageArray = imageResults.rows;
                     console.log(imageArray);
-                    //add to returnArray
-                    returnArray.push(imageArray);
-                    console.log(returnArray);
-                    _a.label = 18;
-                case 18:
-                    if (!!locationImage) return [3 /*break*/, 20];
-                    return [4 /*yield*/, client.query("select li.\"image_id\", array_agg(distinct (li.\"image\")) as images\n                                                        from project_2.location_images li\n                                                        left join project_2.locations_location_images lli on li.\"image_id\"=lli.\"image_id\"\n                                                        where lli.\"location_id\" = $1\n                                                        group by li.\"image_id\";", [locationId])
-                        //make an array of Image objects using previous results
-                    ];
-                case 19:
-                    imageResults = _a.sent();
-                    oldImageArray = imageResults.rows;
-                    console.log(oldImageArray);
-                    //add to returnArray
-                    returnArray.push(oldImageArray);
-                    console.log(returnArray);
-                    _a.label = 20;
-                case 20: return [4 /*yield*/, client.query('COMMIT;')]; //end transaction
-                case 21:
+                    _a.label = 14;
+                case 14: return [4 /*yield*/, client.query('COMMIT;')
+                    //we are not returning anything!
+                ]; //end transaction
+                case 15:
                     _a.sent(); //end transaction
-                    console.log(returnArray);
-                    return [3 /*break*/, 24];
-                case 22:
-                    e_3 = _a.sent();
+                    return [3 /*break*/, 18];
+                case 16:
+                    e_4 = _a.sent();
                     client && client.query('ROLLBACK;');
-                    if (e_3.message === "Not Found") {
+                    if (e_4.message === "Not Found") {
                         throw new Location_Not_Found_Error_1.LocationNotFoundError;
                     }
-                    if (e_3.message === "Not Visited") {
+                    if (e_4.message === "Not Visited") {
                         throw new Location_Not_Visted_Error_1.LocationNotVisitedError;
                     }
-                    console.log(e_3);
+                    console.log(e_4);
                     throw new Error("This error can't be handled, like the way the ring can't be handled by anyone but Frodo");
-                case 23:
+                case 17:
                     client && client.release();
                     return [7 /*endfinally*/];
-                case 24: return [2 /*return*/];
+                case 18: return [2 /*return*/];
             }
         });
     });
 }
 exports.userUpdateLocation = userUpdateLocation;
-// //the update endpoint for admin
-// export async function updateLocation(updatedLocation:Location): Promise<Location> {
-//     let client: PoolClient
-//     try {
-//         client = await connectionPool.connect()
-//         await client.query('BEGIN;') 
-//         if (updatedLocation.name){
-//         }
-//         if (updatedLocation.realm){
-//         }
-//         if (updatedLocation.governance){
-//         }
-//         if (updatedLocation.primaryPopulation){
-//         }
-//         if (updatedLocation.description){
-//         }
-//         if (updatedLocation.rating){
-//         }
-//         if (updatedLocation.name){
-//         }
-//         if (updatedLocation.name){
-//         }
-//     } catch(e) {
-//     } finally {
-//         client && client.release()
-//     }
-// }
+//the update endpoint for admin
+function adminUpdateLocation(updatedLocation) {
+    return __awaiter(this, void 0, void 0, function () {
+        var client, e_5;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 12, 13, 14]);
+                    return [4 /*yield*/, _1.connectionPool.connect()];
+                case 1:
+                    client = _a.sent();
+                    return [4 /*yield*/, client.query('BEGIN;')];
+                case 2:
+                    _a.sent();
+                    if (!updatedLocation.name) return [3 /*break*/, 4];
+                    return [4 /*yield*/, client.query("update  " + schema + ".locations set \"name\" = $1 where \"location_id\" = $2", [updatedLocation.name, updatedLocation.locationId])];
+                case 3:
+                    _a.sent();
+                    _a.label = 4;
+                case 4:
+                    if (!updatedLocation.realm) return [3 /*break*/, 6];
+                    return [4 /*yield*/, client.query("update  " + schema + ".locations set \"realm\" = $1 where \"location_id\" = $2", [updatedLocation.realm, updatedLocation.locationId])];
+                case 5:
+                    _a.sent();
+                    _a.label = 6;
+                case 6:
+                    if (!updatedLocation.governance) return [3 /*break*/, 8];
+                    return [4 /*yield*/, client.query("update  " + schema + ".locations set \"governance\" = $1 where \"location_id\" = $2", [updatedLocation.governance, updatedLocation.locationId])];
+                case 7:
+                    _a.sent();
+                    _a.label = 8;
+                case 8:
+                    if (!updatedLocation.primaryPopulation) return [3 /*break*/, 10];
+                    return [4 /*yield*/, client.query("update  " + schema + ".locations set \"primary_population\" = $1 where \"location_id\" = $2", [updatedLocation.primaryPopulation, updatedLocation.locationId])];
+                case 9:
+                    _a.sent();
+                    _a.label = 10;
+                case 10: 
+                //add that an admin can delete the record of a user visiting? 
+                //maybe too complicated...
+                return [4 /*yield*/, client.query('COMMIT;')]; //end transaction
+                case 11:
+                    //add that an admin can delete the record of a user visiting? 
+                    //maybe too complicated...
+                    _a.sent(); //end transaction
+                    return [2 /*return*/, findLocationById(updatedLocation.locationId)];
+                case 12:
+                    e_5 = _a.sent();
+                    client && client.query('ROLLBACK;'); //if a js error takes place, send it back
+                    console.log(e_5);
+                    throw new Error("This error can't be handled, like the way the ring can't be handled by anyone but Frodo");
+                case 13:
+                    client && client.release();
+                    return [7 /*endfinally*/];
+                case 14: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.adminUpdateLocation = adminUpdateLocation;
 //# sourceMappingURL=location-dao.js.map
