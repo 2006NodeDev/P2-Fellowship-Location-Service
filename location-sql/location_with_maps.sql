@@ -1,12 +1,12 @@
 --we'll put the database stuff for locations here (change once photos are in)
-create schema project_2_location_service_maps;
-set schema 'project_2_location_service_maps';
+create schema project_2_location_service;
+set schema 'project_2_location_service';
 
---drop table users;
---drop table locations;
---drop table users_locations;
---drop table location_images;
---drop table locations_location_images;
+drop table users cascade;
+drop table locations cascade;
+drop table users_locations cascade;
+drop table location_images cascade;
+drop table locations_location_images cascade;
 
 create table users(
 	"user_id" serial primary key,
@@ -55,7 +55,7 @@ create table locations_location_images(
 
 --inserting fake data!!!
 
-insert into project_2_location_service_maps.users ("username", "password", "first_name", "last_name", "affiliation", "address", "email", "role", "image")
+insert into users ("username", "password", "first_name", "last_name", "affiliation", "address", "email", "role", "image")
 	values ('Mithrandir', 'YouShallNotPass', 'Gandalf', null, 'Fellowship', null, 'shadofaxTheFast@email.com', 'Admin', null),
 		   ('RingBearer', 'myPrecious', 'Frodo', 'Baggins', 'Fellowship', 'The Shire', 'frodoUnderhill@email.com', 'User', null),
 		   ('SamIAm', 'password', 'Samwise', 'Gamgee', 'Fellowship', 'The Shire', 'potatoes4life@email.com', 'User', null),
@@ -74,26 +74,26 @@ insert into project_2_location_service_maps.users ("username", "password", "firs
 --select * from users;
 
 insert into locations("name", "realm", "governance", "primary_population", "description", "lat", "lng")
-	values ('The Lonely Mountain', 'Erebor', 'Heirs of Durin', 'Dwarves', 'A mountain in the north-east of Rhovanion and the source of the river Running, and a major Dwarven stronghold', -39.304394, 175.526879),
-           ('Rivendell', 'Eriador', 'Elrond', 'Elves', 'The beautiful, hidden refuge of the elves, on the west side of the Misty Mountains', -41.043036, 175.158078),
-           ('Caras Galadon', 'Lorien', 'The Kings of Lorien', 'Elves', 'Also known as the "Heart of Elvendom on Earth," this golden wood is protected by the power of Galadriel', -45.092183, 168.538091),
-           ('The Elven Gate', 'Mirkwood', 'Thranduil', 'Elves', 'The entrance to the Elvish Road through Mirkwood, supposedly protected by the elves', -45.190767, 167.829326),
-           ('Fangorn Forest', 'Rohan', null, 'Ents', 'Nestled between the Misty Mountains and Rohan, this forest is home to the last remaining Ents and Huorns', -45.416655, 167.716661),
-           ('The Mines of Moria', 'Khazad-dum (Misty Mountains)', null, 'Goblins', 'Once a thriving dwarf city, it has since been overrun with goblins. Oh and a Balrog.', -41.551987, 172.540790),
-           ('Hobbiton', 'The Shire', 'The Mayor', 'Hobbits', 'A peaceful village located in the Westfarthing of the Shire', -37.872003, 175.682917),
-           ('Bag End', 'The Shire', null, 'Hobbits', 'The abode of Bilbo and Frodo', -37.857541, 175.679868),
-           ('Minas Tirith', 'Gondor', 'The Steward of Gondor', 'Humans', 'The capital of Gondor, built into Mount Mindolluin, boasting seven layers leading up to the White Tower', -41.132910, 175.006884),
-           ('Osgiliath', 'Gondor', 'The Steward of Gondor', 'Humans', 'In ages past this was the capital of Gondor, but its proximity to Mordor has made it a contested warzone', -40.582880, 175.204825),
-           ('Esgaroth', 'Rhovanion', 'The Master', 'Humans', 'Previously Laketown, this is where the survivors from Dale reestablished themselves after Smaug was slain', -44.071569, 170.166566),
+	values ('Bag End', 'The Shire', null, 'Hobbits', 'The abode of Bilbo and Frodo', -37.857541, 175.679868),
            ('Edoras', 'Rohan', 'The King of Rohan', 'Humans', 'The capital of Rohan, located in the valley of Harrowdale', -43.548000, 170.892908),
+           ('Esgaroth', 'Rhovanion', 'The Master', 'Humans', 'Previously Laketown, this is where the survivors from Dale reestablished themselves after Smaug was slain', -44.071569, 170.166566),
+           ('Fangorn Forest', 'Rohan', null, 'Ents', 'Nestled between the Misty Mountains and Rohan, this forest is home to the last remaining Ents and Huorns', -45.416655, 167.716661),
            ('Helm''s Deep', 'Rohan', 'The King of Rohan', 'Humans', 'An impenetrable fortress built into the White Mountains', -41.132910, 175.006884),
+           ('Hobbiton', 'The Shire', 'The Mayor', 'Hobbits', 'A peaceful village located in the Westfarthing of the Shire', -37.872003, 175.682917),
+           ('Isengard', ' Nan Curunir', 'Saruman', 'Wizards', 'Now a hive for uruk-hia, since Saruman joined forces with Sauron', -44.404200, 168.204570),
+           ('Lothlorien', 'Lorien', 'The Kings of Lorien', 'Elves', 'Also known as the "Heart of Elvendom on Earth," this golden wood is protected by the power of Galadriel', -45.092183, 168.538091),
+           ('Minas Tirith', 'Gondor', 'The Steward of Gondor', 'Humans', 'The capital of Gondor, built into Mount Mindolluin, boasting seven layers leading up to the White Tower', -41.132910, 175.006884),
+           ('Mount Doom', 'Mordor', 'Sauron', null, 'The volcano where the one ring was forged, and the only place it can be destroyed', -39.156841, 175.632148),
+           ('Osgiliath', 'Gondor', 'The Steward of Gondor', 'Humans', 'In ages past this was the capital of Gondor, but its proximity to Mordor has made it a contested warzone', -40.582880, 175.204825),
+           ('Rivendell', 'Eriador', 'Elrond', 'Elves', 'The beautiful, hidden refuge of the elves, on the west side of the Misty Mountains', -41.043036, 175.158078),
+           ('The Argonath', 'Gondor', 'The Steward of Gondor', null, 'Also known as the Pillars of the Kings, these giant statues mark the northern border of Gondor by the Anduin River', -45.010515, 168.893749),
            ('The Black Gate', 'Mordor', 'Sauron', 'Ors', 'The main way to enter Mordor, but almost impossible to get through', -39.278381, 175.611010),
            ('The Dead Marshes', 'Dagorlad', null, 'The Dead', 'Don''t look into the water', -45.507643, 167.700146),
+           ('The Elven Gate', 'Mirkwood', 'Thranduil', 'Elves', 'The entrance to the Elvish Road through Mirkwood, supposedly protected by the elves', -45.190767, 167.829326),
+		   ('The Lonely Mountain', 'Erebor', 'Heirs of Durin', 'Dwarves', 'A mountain in the north-east of Rhovanion and the source of the river Running, and a major Dwarven stronghold', -39.304394, 175.526879),
+           ('The Mines of Moria', 'Khazad-dum (Misty Mountains)', null, 'Goblins', 'Once a thriving dwarf city, it has since been overrun with goblins. Oh and a Balrog.', -41.551987, 172.540790),
            ('The Paths of the Dead', 'The White Mountains', 'The King of the Dead', 'The Dead', 'A pass through the mountains haunted by the Dead Men of Dunharrow after they broke their promised alliance with Isildur', -41.445537, 175.247962),
-           ('Isengard', ' Nan Curunir', 'Saruman', 'Wizards', 'Now a hive for uruk-hia, since Saruman joined forces with Sauron', -44.404200, 168.204570),
-           ('Weathertop', 'Eriador', null, null, 'The long-since abandoned watch tower Amon Sul; a cool place to get stabbed', -37.482940, 174.760882),
-           ('The Argonath', 'Gondor', 'The Steward of Gondor', null, 'Also known as the Pillars of the Kings, these giant statues mark the northern border of Gondor by the Anduin River', -45.010515, 168.893749),
-           ('Mount Doom', 'Mordor', 'Sauron', null, 'The volcano where the one ring was forged, and the only place it can be destroyed', -39.156841, 175.632148);
+           ('Weathertop', 'Eriador', null, null, 'The long-since abandoned watch tower Amon Sul; a cool place to get stabbed', -37.482940, 174.760882);
 --select * from locations;		  
 
 insert into users_locations ("user_id", "location_id", "rating")
@@ -115,20 +115,67 @@ insert into users_locations ("user_id", "location_id", "rating")
 --select * from users_locations;
 
 insert into location_images("image")
-	values ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Moria.jpg'),
-		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/bag-end-1.jpg'),
-		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/bag-end-2.jpg'),
+	values ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/BagEnd.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/BagEnd2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Edoras.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Edoras2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Esgaroth.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/FangornForest.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/FangornForest2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/HelmsDeep.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/HelmsDeep2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Hobbiton.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Hobbiton2.jpg'),
 		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Isengard.jpg'),
-		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/edoras.jpg'); --nothing yet; don't want the bucket to ruin things
---select * from location_images; 
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Isengard2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Lothlorien.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Lothlorien2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/MinasTirith.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/MinasTirith2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/MountDoom.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/MountDoom2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/MountDoom3.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Osgiliath.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Osgiliath2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Rivendell.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Rivendell2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Rivendell3.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/TheArgonath.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/TheBlackGate.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/TheDeadMarshes.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/TheElvenGate.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/TheLonelyMountain.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/TheLonelyMountain2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/TheMinesOfMoria.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/TheMinesOfMoria2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/TheMinesOfMoria3.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/ThePathsOfTheDead.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/ThePathsOfTheDead2.jpg'),
+		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Weathertop.jpg');
+select * from location_images; 
 
 insert into locations_location_images("location_id", "image_id")
-	values (2,1),
-		   (1,2),
-		   (1,3),
-		   (4,4),
-		   (3,5);
---select * from locations_location_images;
+	values (1,1),(1,2),
+		   (2,3),(2,4),
+		   (3,5),
+		   (4,6),(4,7),
+		   (5,8),(5,9),
+		   (6,10),(6,11),
+		   (7,12),(7,13),
+		   (8,14),(8,15),
+		   (9,16),(9,17),
+		   (10,18),(10,19),(10,20),
+		   (11,21),(11,22),
+		   (12,23),(12,24),(12,25),
+		   (13,26),
+		   (14,27),
+		   (15,28),
+		   (16,29),
+		   (17,30),(17,31),
+		   (18,32),(18,33),(18,34),
+		   (19,35),(19,36),
+		   (20,37);
+select * from locations_location_images;
 
 		  
 		  
@@ -170,7 +217,7 @@ update locations l
 
 
 --get all locations with images
-select l."location_id", l."name", l."realm", l."governance", l."primary_population", l."description", l."avg_rating", l."num_visited", 
+select l."location_id", l."name", l."lat", l."lng",
  	array_agg(distinct (li."image")) as images
  	from locations l
  	left join locations_location_images lli on l."location_id"=lli."location_id"
