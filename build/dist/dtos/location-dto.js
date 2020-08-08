@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LocationDTO = void 0;
-//DB version
+//DB version of location
 var LocationDTO = /** @class */ (function () {
     function LocationDTO() {
     }

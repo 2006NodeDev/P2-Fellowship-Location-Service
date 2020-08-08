@@ -45,10 +45,10 @@ var location_service_1 = require("../services/location-service");
 var Location_Id_Input_Error_1 = require("../errors/Location-Id-Input-Error");
 var Location_Id_Number_Needed_Error_1 = require("../errors/Location-Id-Number-Needed-Error");
 var Location_Not_Visted_Error_1 = require("../errors/Location-Not-Visted-Error");
-var authentication_middleware_1 = require("../middleware/authentication-middleware");
+//import { authenticationMiddleware } from '../middleware/authentication-middleware'
 exports.locationRouter = express_1.default.Router();
 //we're setting this here and not in the index
-exports.locationRouter.use(authentication_middleware_1.authenticationMiddleware);
+//locationRouter.use(authenticationMiddleware)
 //GET all locations
 exports.locationRouter.get('/', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var locations, e_1;
@@ -95,13 +95,16 @@ exports.locationRouter.get('/:locationId', function (req, res, next) { return __
     });
 }); });
 //PATCH user update 
-exports.locationRouter.patch('/update/:locationId', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var locationIdIput, locationId, _a, visited, rating, image, updatesMade, e_3;
+exports.locationRouter.patch('/user/update/:locationId', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var locationId, currentUserId, _a, visited, rating, image, updatesMade, e_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                locationIdIput = req.params;
-                locationId = +locationIdIput;
+                locationId = req.params.locationId;
+                currentUserId = req.user.userId;
+                //make sure they are numbers below
+                console.log(+locationId);
+                console.log(+currentUserId);
                 _a = req.body, visited = _a.visited, rating = _a.rating, image = _a.image;
                 if (!(!locationId || isNaN(+locationId))) return [3 /*break*/, 1];
                 next(new Location_Id_Number_Needed_Error_1.LocationIdNumberNeededError);
@@ -112,10 +115,11 @@ exports.locationRouter.patch('/update/:locationId', function (req, res, next) { 
                 return [3 /*break*/, 5];
             case 2:
                 _b.trys.push([2, 4, , 5]);
-                return [4 /*yield*/, location_service_1.userUpdateLocationService(locationId, req.user.userId, visited, rating, image)];
+                return [4 /*yield*/, location_service_1.userUpdateLocationService(+locationId, +currentUserId, visited, rating, image)];
             case 3:
                 updatesMade = _b.sent();
                 console.log(updatesMade);
+                //check
                 res.status(200).send("Your contribution has been taken into consideration");
                 return [3 /*break*/, 5];
             case 4:
@@ -126,80 +130,59 @@ exports.locationRouter.patch('/update/:locationId', function (req, res, next) { 
         }
     });
 }); });
-// //possible patch? for admin
-// locationRouter.patch('/update/:locationId', async (req:Request, res:Response, next:NextFunction) => {
-//     let {locationId} = req.params
-//     //get user id
-//     let { name,
-//         image,//array?
-//         realm, 
-//         governance,
-//         primaryPopulation, 
-//         description,
-//         rating, 
-//         numVisited} = req.body
-//     console.log(req.body)
-//     if(!locationId || isNaN(+locationId)) { 
-//        next (new LocationIdNumberNeededError)    
-//     } else {
-//        //updated the num_visited and places_visited for locations and users resp.
-//        //add a photo to the array 
-//        //add a rating, then upate the locations rating average    
-//         let updatedLocation:Location = 
-//         { 
-//             locationId, 
-//             name,
-//             image,//array?
-//             realm, 
-//             governance,
-//             primaryPopulation, 
-//             description,
-//             rating, 
-//             numVisited
-//         }
-//         updatedLocation.name = name || undefined
-//         updatedLocation.image = image || undefined
-//         updatedLocation.realm =  realm || undefined
-//         updatedLocation.governance =  governance || undefined
-//         updatedLocation.primaryPopulation = primaryPopulation || undefined
-//         updatedLocation.rating =  rating || undefined
-//         updatedLocation.numVisited = numVisited || undefined
-//         try 
-//         {
-//             let updatedLocationResults = await updatelocationInfo(updatedLocation)
-//             res.json(updatedLocationResults)
-//         } 
-//         catch (e) 
-//         {
-//             next(e)
-//         }
-//     }
-// })
-/*for a new location!
-locationRouter.post('/', (req: Request, res: Response) => {
-    console.log(req.body);
-    let
-    {
-        name,
-        image,//array?
-        realm,
-        governance,
-        primaryPopulation,
-        governance,
-        rating,
-        numVisited,
-         } = req.body //this is destructuring
-    // warning if data is allowed to be null or 0, or false, this check is not sufficient
-    if (locationId && genre && authors && publishingDate && publisher && pages && chapters && title && ISBN && (!series && numVisitedof (series) === 'boolean' || series) && numberInSeries) {
-        //locations.push({ locationId, genre, authors, publisher, publishingDate, pages, chapters, title, series, numberInSeries, ISBN })
-        //send description just sents an empty response with the  description code provided
-        res.send(201)//201 is created
-    } else {
-        // . description sets the  description code but deson't send res
-        // .send can send a response in many different content-numVisiteds
-        throw new LocationUserInputError()
-    }
-})
-
-*/ 
+//PATH for admin
+exports.locationRouter.patch('/update/:locationId', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var locationId, currentLocationId, _a, name, realm, governance, primaryPopulation, description, updatedLocation, _b, updatedLocationResults, e_4;
+    return __generator(this, function (_c) {
+        switch (_c.label) {
+            case 0:
+                locationId = req.params.locationId;
+                currentLocationId = +locationId;
+                _a = req.body, name = _a.name, realm = _a.realm, governance = _a.governance, primaryPopulation = _a.primaryPopulation, description = _a.description;
+                //here, admins only update the fields above. Otherwise, they can go to the other update component to act as a user
+                console.log(req.body);
+                if (!(!currentLocationId || isNaN(currentLocationId))) return [3 /*break*/, 1];
+                next(new Location_Id_Number_Needed_Error_1.LocationIdNumberNeededError);
+                return [3 /*break*/, 8];
+            case 1:
+                _b = {
+                    locationId: currentLocationId,
+                    name: name
+                };
+                return [4 /*yield*/, location_service_1.findLocationByIdService(currentLocationId)];
+            case 2:
+                _b.image = (_c.sent()).image,
+                    _b.realm = realm,
+                    _b.governance = governance,
+                    _b.primaryPopulation = primaryPopulation,
+                    _b.description = description;
+                return [4 /*yield*/, location_service_1.findLocationByIdService(currentLocationId)];
+            case 3:
+                _b.rating = (_c.sent()).rating;
+                return [4 /*yield*/, location_service_1.findLocationByIdService(currentLocationId)];
+            case 4:
+                updatedLocation = (_b.numVisited = (_c.sent()).numVisited,
+                    _b);
+                updatedLocation.name = name || undefined;
+                updatedLocation.realm = realm || undefined;
+                updatedLocation.governance = governance || undefined;
+                updatedLocation.primaryPopulation = primaryPopulation || undefined;
+                _c.label = 5;
+            case 5:
+                _c.trys.push([5, 7, , 8]);
+                return [4 /*yield*/, location_service_1.adminUpdateLocationService(updatedLocation)];
+            case 6:
+                updatedLocationResults = _c.sent();
+                console.log(updatedLocationResults);
+                //check
+                res.json(updatedLocationResults);
+                return [3 /*break*/, 8];
+            case 7:
+                e_4 = _c.sent();
+                next(e_4);
+                return [3 /*break*/, 8];
+            case 8: return [2 /*return*/];
+        }
+    });
+}); });
 //# sourceMappingURL=location-router.js.map

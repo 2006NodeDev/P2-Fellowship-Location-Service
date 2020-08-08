@@ -3,9 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LocationDTOtoLocationConvertor = void 0;
 function LocationDTOtoLocationConvertor(dto) {
     var image = [];
+    var x = 0;
     for (var _i = 0, _a = dto.images; _i < _a.length; _i++) {
         var i = _a[_i];
-        image.push({ imageId: 0, image: i }); //Image Id error comes from here OR from DB joins being incorrect for imgids
+        image.push({ imageId: dto.image_ids[x], image: i });
+        x++;
     }
     return {
         locationId: dto.location_id,
@@ -16,7 +18,9 @@ function LocationDTOtoLocationConvertor(dto) {
         primaryPopulation: dto.primary_population,
         description: dto.description,
         rating: dto.avg_rating,
-        numVisited: dto.num_visited
+        numVisited: dto.num_visited,
+        latitude: dto.lat,
+        longitude: dto.lng
         /*ISBN: dto.ISBN.toString(),
         authors:dto.authors,
         genre,

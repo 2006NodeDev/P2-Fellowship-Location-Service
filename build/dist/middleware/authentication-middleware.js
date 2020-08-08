@@ -6,7 +6,7 @@ function authenticationMiddleware(req, res, next) {
         res.status(401).send('Please Login'); // this could be an error as well
     }
     else {
-        console.log("user " + req.user.username + " has a role of " + req.user.role);
+        console.log("User " + req.user.username + " has a role of " + req.user.role);
         next();
     }
 }
