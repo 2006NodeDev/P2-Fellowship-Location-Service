@@ -58,14 +58,8 @@ locationRouter.patch('/user/update/:locationId', async (req:any, res:Response, n
     } else {
         try {
            //this is going to be the array returned (with placesVisited, numVisited, (avg)rating, and Images[])
-<<<<<<< HEAD
             let updatesMade = await userUpdateLocationService(+locationId, +currentUserId, numVisited, rating, image)
-            console.log(updatesMade); //hmmmmm?
-            
-=======
-            let updatesMade = await userUpdateLocationService(+locationId, +currentUserId, visited, rating, image)
             logger.debug(updatesMade);
->>>>>>> d9c6b21a671bd1c25a2547574fcda616c4682e62
             //check
             res.status(200).send("Your contribution has been taken into consideration")
             //what should we send as a response? 
