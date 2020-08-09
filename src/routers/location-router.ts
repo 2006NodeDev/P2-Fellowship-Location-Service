@@ -5,6 +5,7 @@ import { Location } from '../models/Location'
 import { LocationIdInputError } from '../errors/Location-Id-Input-Error'
 import { LocationIdNumberNeededError } from '../errors/Location-Id-Number-Needed-Error'
 import { LocationNotVisitedError } from '../errors/Location-Not-Visted-Error'
+import { logger } from '../utils/logger'
 //import { authenticationMiddleware } from '../middleware/authentication-middleware'
  
 export let locationRouter = express.Router()
@@ -44,20 +45,27 @@ locationRouter.patch('/user/update/:locationId', async (req:any, res:Response, n
     let { locationId }= req.params
     let currentUserId = req.user.userId
     //make sure they are numbers below
-    console.log(+locationId);
-    console.log(+currentUserId);
+    logger.debug(+locationId);
+    logger.debug(+currentUserId);
     
-    let {visited, rating, image} = req.body
+    let {numVisited, rating, image} = req.body
+    console.log(req.body)
 
     if(!locationId || isNaN(+locationId)) { 
         next (new LocationIdNumberNeededError)    
-    } else if (visited === false){
+    } else if (numVisited === false){
         next (new LocationNotVisitedError)
     } else {
         try {
            //this is going to be the array returned (with placesVisited, numVisited, (avg)rating, and Images[])
+<<<<<<< HEAD
+            let updatesMade = await userUpdateLocationService(+locationId, +currentUserId, numVisited, rating, image)
+            console.log(updatesMade); //hmmmmm?
+            
+=======
             let updatesMade = await userUpdateLocationService(+locationId, +currentUserId, visited, rating, image)
-            console.log(updatesMade);
+            logger.debug(updatesMade);
+>>>>>>> d9c6b21a671bd1c25a2547574fcda616c4682e62
             //check
             res.status(200).send("Your contribution has been taken into consideration")
             //what should we send as a response? 
@@ -83,7 +91,7 @@ locationRouter.patch('/update/:locationId', async (req:Request, res:Response, ne
         primaryPopulation, 
         description} = req.body
     //here, admins only update the fields above. Otherwise, they can go to the other update component to act as a user
-    console.log(req.body)
+    logger.debug(req.body)
     if(!currentLocationId || isNaN(currentLocationId)) { 
        next (new LocationIdNumberNeededError)    
     } else {
@@ -105,7 +113,7 @@ locationRouter.patch('/update/:locationId', async (req:Request, res:Response, ne
         updatedLocation.primaryPopulation = primaryPopulation || undefined
         try {
             let updatedLocationResults = await adminUpdateLocationService(updatedLocation)
-            console.log(updatedLocationResults);
+            logger.debug(updatedLocationResults);
             //check
             res.json(updatedLocationResults)
         } catch (e) {

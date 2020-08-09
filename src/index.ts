@@ -3,6 +3,9 @@ import { loggingMiddleware } from './middleware/logging-middleware'
 import { corsFilter } from './middleware/cors-filter'
 import { JWTVerifyMiddleware } from './middleware/jwt-verify-middleware'
 import { locationRouter } from './routers/location-router'
+import { logger, errorLogger } from './utils/logger'
+
+const basePath = process.env['LB_BASE_PATH'] || ''
 // import './messaging/index'
 // import './messaging/user-service-event-listeners'
 
@@ -18,6 +21,8 @@ app.use(loggingMiddleware)
 app.use(corsFilter)
 
 app.use(JWTVerifyMiddleware)
+const basePathRouter = express.Router()
+app.use(basePath, basePathRouter) 
 
 //const basePathRouter = express.Router()
 //app.use(basePath, basePathRouter)
@@ -25,7 +30,7 @@ app.use(JWTVerifyMiddleware)
 
 //app.use(authenticationMiddleware) this makes us unable to login... but do we want it?
 
-app.use('/locations', locationRouter)// redirect all requests on /locations to the router
+basePathRouter.use('/locations', locationRouter)// redirect all requests on /locations to the router
 
 app.get('/health', (req:Request,res:Response)=>{
     res.sendStatus(200)
@@ -38,12 +43,13 @@ app.use((err, req, res, next) => {
        
         res.status(err.statusCode).send(err.message)
     } else {
-        console.log(err)//log it out for us to debug
+        logger.error(err);
+        errorLogger.error(err)//log it out for us to debug
         //send a generic error response
         res.status(500).send('Oops, Something went wrong')
     }
 })
 
 app.listen(2006, () => {
-    console.log('Server has started');
+    logger.info('Server has started');
 })
