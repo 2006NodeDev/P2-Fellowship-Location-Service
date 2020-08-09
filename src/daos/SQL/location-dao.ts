@@ -6,6 +6,7 @@ import { Location } from "../../models/Location";
 import { Image } from "../../models/Image";
 import { LocationNotVisitedError } from "../../errors/Location-Not-Visted-Error";
 import { ImageDTOtoImageConverter } from "../../utils/ImageDTO-to-Image-Converter";
+import { logger, errorLogger } from "../../utils/logger";
 
 const schema = process.env['P2_SCHEMA'] || 'project_2_location_service'
 
@@ -25,11 +26,12 @@ export async function getAllLocations(): Promise<Location[]> {
                                             group by l."location_id";`)
         //return results
         //console.log(results);        
-        console.log(results.rows.map(LocationDTOtoLocationConvertor))
+        logger.debug(results.rows.map(LocationDTOtoLocationConvertor))
         return results.rows.map(LocationDTOtoLocationConvertor)
     } catch (e) {
         //if we get an error we don't know
-        console.log(e)
+        logger.error(e);
+        errorLogger.error(e)
         throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
     } finally {
         // we make sure client isn't undefined
@@ -50,7 +52,7 @@ export async function findLocationById(locationId:number): Promise<Location> {
                                             left join ${schema}.location_images li on li."image_id"=lli."image_id"
                                             where l."location_id"=$1
                                             group by l."location_id";`, [locationId])
-        console.log(results.rows[0]);        
+        logger.debug(results.rows[0]);        
         if(results.rowCount === 0){
             throw new Error('NotFound')
         }else{
@@ -60,7 +62,8 @@ export async function findLocationById(locationId:number): Promise<Location> {
         if(e.message === 'NotFound'){
             throw new LocationNotFoundError()
         }
-        console.log(e)
+        logger.error(e);
+        errorLogger.error(e)
         throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
     }finally{
         client && client.release()
@@ -76,13 +79,14 @@ export async function addNewImage(image64: String): Promise<Image> {
                                                         values ($1) returning "image_id";`, [image64])
 
         //insert the new image as a 64-bit string in order to get its ID number
-        console.log(ImageDTOtoImageConverter(results.rows[0]))
+        logger.debug(ImageDTOtoImageConverter(results.rows[0]))
         //check that stuff is working the way it's supposed to
         return ImageDTOtoImageConverter(results.rows[0])
         //we will be using this to name file in bucket        
     } catch(e) {
         client && client.query('ROLLBACK;') //if a js error takes place, send it back
-        console.log(e);
+        logger.error(e);
+        errorLogger.error(e)
         throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
     } finally {
         client && client.release()
@@ -109,7 +113,7 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
                                                     where ul."user_id" = $1 and ul."location_id" =$2;`, 
                                                     [userId, locationId])
             //check the results
-            console.log(userLocation.rows[0]);
+            logger.debug(userLocation.rows[0]);
             //we need this so that if a user alread has visited and rated it, we can still change it
             if (!userLocation) {
                 //add a row to the users_locations table
@@ -136,8 +140,8 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
                                         where l."location_id"=$1
                                         returning l."num_visited";`, [locationId]) 
                 //check that we are getting values 
-                console.log(numVisited.rows[0]);
-                console.log(placesVisited.rows[0]);
+                logger.debug(numVisited.rows[0]);
+                logger.debug(placesVisited.rows[0]);
             }
             
         }
@@ -155,7 +159,7 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
                                     where l."location_id" = $1
                                     returning l."avg_rating";`, [locationId]) //can I use two $1? Or should I make it an array?
             //get the average rating
-            console.log(avgRating1.rows[0]);            
+            logger.debug(avgRating1.rows[0]);            
         } 
       
         if (locationImage) {
@@ -174,7 +178,7 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
                                                         group by li."image_id";`, [locationId])
             //make an array of Image objects using previous results
             let imageArray: Image[]= imageResults.rows
-            console.log(imageArray);
+            logger.debug(imageArray);
         } 
         
         await client.query('COMMIT;') //end transaction
@@ -187,7 +191,8 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
         if (e.message === "Not Visited"){
             throw new LocationNotVisitedError
         }
-        console.log(e);
+        logger.error(e);
+        errorLogger.error(e);
         throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
     } finally {
         client && client.release()
@@ -222,7 +227,8 @@ export async function adminUpdateLocation(updatedLocation:Location): Promise<Loc
     return findLocationById(updatedLocation.locationId)
     } catch(e) {
         client && client.query('ROLLBACK;') //if a js error takes place, send it back
-        console.log(e);
+        logger.error(e);
+        errorLogger.error(e)
         throw new Error ("This error can't be handled, like the way the ring can't be handled by anyone but Frodo")
     } finally {
         client && client.release()

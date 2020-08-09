@@ -13,6 +13,7 @@ const mockResponse =() => {
 
 
 import { authorizationMiddleware } from './authorization-middleware'
+import { logger } from '../utils/logger'
 
 
 describe('authorizationMiddleware ', ()=>{
@@ -41,12 +42,12 @@ describe('authorizationMiddleware ', ()=>{
             username:'Mithrandir',
             role:'Admin'
         }
-        console.log = jest.fn()//mock console.log WITH LOGGER
+        logger.debug = jest.fn()//mock console.log WITH LOGGER
         authorizationMiddleware (req)
         expect(res.status).not.toBeCalled()
         expect(res.send).not.toBeCalled()
         expect(next).toBeCalled()
-        expect(console.log).toBeCalledWith('User Mithrandir has a role of Admin')
+        expect(logger.debug).toBeCalledWith('User Mithrandir has a role of Admin')
 
     })
 

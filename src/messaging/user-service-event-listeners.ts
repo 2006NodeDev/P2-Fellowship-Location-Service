@@ -1,5 +1,6 @@
 
 import { userServiceSubscription } from ".";
+import { logger } from "../utils/logger";
 //idk if this is needed but it shouldn't work because subscription does not exist
 
 
@@ -13,7 +14,7 @@ userServiceSubscription.on('message', (message)=>{
         //to update some reference in the databse because something changed
         //if we succeed
         let parsedData = JSON.parse(Buffer.from(message.data, 'base64').toString())
-        console.log(parsedData);
+        logger.debug(parsedData);
         message.ack()
     }catch(e){
         //must have failed to update db for some reason
