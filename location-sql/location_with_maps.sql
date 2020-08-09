@@ -40,7 +40,7 @@ create table users_locations(
 	"rating" int,
 	primary key ("user_id", "location_id")
 );
-
+//"user_id" int references project_2_user_service.users ("user_id"),
 create table location_images(
 	"image_id" serial primary key,
 	"image" text not null

@@ -113,25 +113,25 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
             //we need this so that if a user alread has visited and rated it, we can still change it
             if (!userLocation) {
                 //add a row to the users_locations table
-                await client.query(`insert into  ${schema}.users_locations ("user_id", "location_id")
+                await client.query(`insert into  project_2_location_service.users_locations ("user_id", "location_id")
                                                     values ($1,$2);`, [userId, locationId])
                 
                 //update the number in the places_visited column for the user            
                 //and get the updated places_visited
-                let placesVisited = await client.query(`update  ${schema}.users u 
+                let placesVisited = await client.query(`update project_2_user_service.users u 
                                         set "places_visited" = 
                                             (select COUNT(ul."location_id") 
-                                            from  ${schema}.users_locations ul
+                                            from project_2_location_service.users_locations ul
                                             where ul."user_id" = $1)
                                         where u."user_id"=$1
                                         returning u."places_visited";`, [userId]) 
 
                 //update the number in num_visited column for the location
                 //get the updated num_visited
-                let numVisited = await client.query(`update  ${schema}.locations l
+                let numVisited = await client.query(`update  project_2_location_service.locations l
                                         set "num_visited" = 
                                             (select COUNT(ul."user_id") 
-                                            from  ${schema}.users_locations ul
+                                            from  project_2_location_service.users_locations ul
                                             where ul."location_id" = $1)
                                         where l."location_id"=$1
                                         returning l."num_visited";`, [locationId]) 
@@ -141,7 +141,8 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
             }
             
         }
-        if (0 <= locationRating && locationRating <= 5) {
+        
+       if (0 <= locationRating && locationRating <= 5) { //maybe this should be a ||?
             //add the rating in the users_locations table
             await client.query(`update  ${schema}.users_locations ul
                                     set "rating" = $1 
@@ -157,6 +158,7 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
             //get the average rating
             console.log(avgRating1.rows[0]);            
         } 
+        
       
         if (locationImage) {
            //update the image to the location_images table (path name in bucket vs 64-bit string), using the imageId

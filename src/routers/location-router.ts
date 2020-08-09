@@ -47,17 +47,19 @@ locationRouter.patch('/user/update/:locationId', async (req:any, res:Response, n
     console.log(+locationId);
     console.log(+currentUserId);
     
-    let {visited, rating, image} = req.body
+    let {numVisited, rating, image} = req.body
+    console.log(req.body)
 
     if(!locationId || isNaN(+locationId)) { 
         next (new LocationIdNumberNeededError)    
-    } else if (visited === false){
+    } else if (numVisited === false){
         next (new LocationNotVisitedError)
     } else {
         try {
            //this is going to be the array returned (with placesVisited, numVisited, (avg)rating, and Images[])
-            let updatesMade = await userUpdateLocationService(+locationId, +currentUserId, visited, rating, image)
-            console.log(updatesMade);
+            let updatesMade = await userUpdateLocationService(+locationId, +currentUserId, numVisited, rating, image)
+            console.log(updatesMade); //hmmmmm?
+            
             //check
             res.status(200).send("Your contribution has been taken into consideration")
             //what should we send as a response? 
