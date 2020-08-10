@@ -4,10 +4,13 @@ import { corsFilter } from './middleware/cors-filter'
 import { JWTVerifyMiddleware } from './middleware/jwt-verify-middleware'
 import { locationRouter } from './routers/location-router'
 import { logger, errorLogger } from './utils/logger'
+import './messaging/index'
+import './messaging/user-service-event-listeners'
+
+
 
 const basePath = process.env['LB_BASE_PATH'] || ''
-// import './messaging/index'
-// import './messaging/user-service-event-listeners'
+
 
 // const basePath = process.env['P2_BASE_PATH'] || '' //use / if there is no other base path provided
 

@@ -11,11 +11,13 @@ import { logger } from "../utils/logger";
 userServiceSubscription.on('message', (message)=>{
     
     try{
+        console.log(message)
+        message.ack()
         //to update some reference in the databse because something changed
         //if we succeed
         let parsedData = JSON.parse(Buffer.from(message.data, 'base64').toString())
         logger.debug(parsedData);
-        message.ack()
+        
     }catch(e){
         //must have failed to update db for some reason
         message.nack()
