@@ -1,0 +1,45 @@
+[2020-08-09T20:32:35.160] [ERROR] error - Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+    at ServerResponse.setHeader (_http_outgoing.js:518:11)
+    at ServerResponse.header (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\node_modules\express\lib\response.js:771:10)
+    at ServerResponse.send (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\node_modules\express\lib\response.js:170:12)
+    at C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\routers\location-router.ts:68:29
+    at step (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\routers\location-router.ts:33:23)
+    at Object.next (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\routers\location-router.ts:14:53)
+    at fulfilled (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\routers\location-router.ts:5:58)
+    at processTicksAndRejections (internal/process/task_queues.js:97:5) {
+  code: 'ERR_HTTP_HEADERS_SENT'
+}
+[2020-08-09T20:58:33.709] [ERROR] error - Error: connect ETIMEDOUT 35.245.17.23:5432
+    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1141:16) {
+  errno: 'ETIMEDOUT',
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '35.245.17.23',
+  port: 5432
+}
+[2020-08-09T20:58:33.795] [ERROR] error - Error: This error can't be handled, like the way the ring can't be handled by anyone but Frodo
+    at Object.<anonymous> (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:35:15)
+    at step (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:33:23)
+    at Object.throw (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:14:53)
+    at rejected (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:6:65)
+    at processTicksAndRejections (internal/process/task_queues.js:97:5)
+[2020-08-09T20:58:49.458] [ERROR] error - Error: connect ETIMEDOUT 35.245.17.23:5432
+    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1141:16) {
+  errno: 'ETIMEDOUT',
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '35.245.17.23',
+  port: 5432
+}
+[2020-08-09T20:58:49.469] [ERROR] error - Error: This error can't be handled, like the way the ring can't be handled by anyone but Frodo
+    at Object.<anonymous> (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:200:15)
+    at step (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:33:23)
+    at Object.throw (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:14:53)
+    at rejected (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:6:65)
+    at processTicksAndRejections (internal/process/task_queues.js:97:5)
+[2020-08-09T20:58:49.476] [ERROR] error - Error: This error can't be handled, like the way the ring can't be handled by anyone but Frodo
+    at Object.<anonymous> (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:200:15)
+    at step (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:33:23)
+    at Object.throw (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:14:53)
+    at rejected (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:6:65)
+    at processTicksAndRejections (internal/process/task_queues.js:97:5)

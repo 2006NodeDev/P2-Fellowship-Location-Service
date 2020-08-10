@@ -23,7 +23,8 @@ export async function userUpdateLocationService(locationId: number, userId: numb
             //then the pop method gets us the last thing in the array
 
             let newImage64Object = await addNewImage(imageBase64Data)
-           logger.debug(newImage64Object.imageId);
+            let imageId = newImage64Object.imageId
+           logger.debug(imageId);
             //need this to get the image Id number
             let location = await findLocationById(locationId)
             //need this to get the location name for the path
@@ -32,25 +33,28 @@ export async function userUpdateLocationService(locationId: number, userId: numb
            logger.debug(locationImageName)
 
             //we need to add the picture path to the location data for the sql database        
-            locationImage = `${bucketBaseUrl}/LOTR_Locations/${locationImageName}-${newImage64Object.imageId}.${contentType}`
+            locationImage = `${bucketBaseUrl}/LOTR_Locations/${locationImageName}-${imageId}.${contentType}`
            logger.debug(locationImage);
             
             //we need to save a picture to cloud storage 
             //we are adding the imageId so that we can save multiple of the same location
-            await saveLocationImage(contentType, imageBase64Data, `LOTR_Locations/${locationImageName}-${newImage64Object.imageId}.${contentType}`)
+            await saveLocationImage(contentType, imageBase64Data, `LOTR_Locations/${locationImageName}-${imageId}.${contentType}`)
             
             //update the location in the database
-            await userUpdateLocation(locationId, userId, locationVisited, locationRating, locationImage, newImage64Object.imageId)
+            let updatedLocationId = await userUpdateLocation(locationId, userId, locationVisited, locationRating, locationImage, imageId)
+            let updatedLocation = await findLocationById(updatedLocationId)            
+
             //(making sure to update row in location_images table to have the path, not the 64-bit data)
-            let updatedLocation = await findLocationById(locationId)
-           logger.debug(updatedLocation.image); //check that it's been updating/returning the right thing
+            logger.debug(updatedLocation); //check that it's been updating/returning the right thing
             //for some reason it is ordering the images in alphabetical order.  It won't be a problem when using real data (since images uploaded later will come after) but it's weird
             return updatedLocation
             //this way we are updating the location and getting the updated location to send back to the front end
         } else {
-            await userUpdateLocation(locationId, userId, locationVisited, locationRating, null, null)
+            let updatedLocationId = await userUpdateLocation(locationId, userId, locationVisited, locationRating, locationImage, 0)
+            let updatedLocation = await findLocationById(updatedLocationId) 
+            console.log(updatedLocation);
+            
             //we need to save the updated location data to the sql database (making sure to update row in location_images table to have the path, not the 64-bit data)
-            let updatedLocation = await findLocationById(locationId)            
             return updatedLocation
             //this way we are updating the location and getting the updated location to send back to the front end
         }

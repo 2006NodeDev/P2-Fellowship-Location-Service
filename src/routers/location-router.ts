@@ -58,10 +58,13 @@ locationRouter.patch('/user/update/:locationId', async (req:any, res:Response, n
     } else {
         try {
            //this is going to be the array returned (with placesVisited, visited, (avg)rating, and Images[])
-            let updatesMade = await userUpdateLocationService(+locationId, +currentUserId, visited, rating, image)
-            logger.debug(updatesMade);
+            let updatedLocation = await userUpdateLocationService(+locationId, +currentUserId, visited, rating, image)
+            console.log(updatedLocation);
+            
+            logger.debug(`Location updates: ${updatedLocation}`);
             //check
-            res.status(200).send("Your contribution has been taken into consideration")
+            res.json(updatedLocation)
+            //res.status(200).send("Your contribution has been taken into consideration")
             //what should we send as a response? 
             //do we need to send requests to updateUser and updateLocations with the new info??
             //the data is already being updated... 

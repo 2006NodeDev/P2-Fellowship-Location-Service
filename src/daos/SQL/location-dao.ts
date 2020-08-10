@@ -113,9 +113,9 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
                                                     where ul."user_id" = $1 and ul."location_id" =$2;`, 
                                                     [userId, locationId])
             //check the results
-            logger.debug(userLocation.rows[0]);
+            logger.debug(`locationVisited ${userLocation.rows[0]}`);
             //we need this so that if a user alread has visited and rated it, we can still change it
-            if (!userLocation) {
+            if (userLocation.rows[0]===undefined) {
                 //add a row to the users_locations table
                 await client.query(`insert into  project_2_location_service.users_locations ("user_id", "location_id")
                                                     values ($1,$2);`, [userId, locationId])
@@ -152,7 +152,7 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
                                     set "rating" = $1 
                                     where ul."user_id" = $2 and ul."location_id" = $3;`, [locationRating, userId, locationId])
             //update the average rating at the end. NOTE: it returns a rounded integer, which should work well if we use start icons or something
-            let avgRating1 = await client.query(`update  ${schema}.locations l
+            let avgRating = await client.query(`update  ${schema}.locations l
                                     set "avg_rating" = 
                                         (select AVG(ul."rating") 
                                         from  ${schema}.users_locations ul
@@ -160,7 +160,7 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
                                     where l."location_id" = $1
                                     returning l."avg_rating";`, [locationId]) //can I use two $1? Or should I make it an array?
             //get the average rating
-            logger.debug(avgRating1.rows[0]);            
+            logger.debug(avgRating);            
         } 
         
       
@@ -184,6 +184,8 @@ export async function userUpdateLocation(locationId: number, userId: number, loc
         } 
         
         await client.query('COMMIT;') //end transaction
+        
+        return locationId
         //we are not returning anything!
     } catch(e) {
         client && client.query('ROLLBACK;') 
