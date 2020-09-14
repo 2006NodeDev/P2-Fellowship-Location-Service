@@ -2,25 +2,11 @@
 create schema project_2_location_service;
 set schema 'project_2_location_service';
 
-drop table users cascade;
+--drop table users cascade;
 drop table locations cascade;
 drop table users_locations cascade;
 drop table location_images cascade;
 drop table locations_location_images cascade;
-
-create table users(
-	"user_id" serial primary key,
-	"username" text not null unique,
-	"password" text not null,
-	"first_name" text not null,
-	"last_name" text,
-	"affiliation" text not null,
-	"places_visited" int, 
-	"address" text,
-	"email" text not null,
-	"role" text not null,
-	"image" text
-);
 
 create table locations(
 	"location_id" serial primary key,
@@ -35,44 +21,25 @@ create table locations(
     "lng" numeric(10,6) not null);
 	
 create table users_locations(
-	"user_id" int references users ("user_id"),
-	"location_id" int references locations ("location_id"),
+	"user_id" int references project_2_user_service.users ("user_id"),
+	"location_id" int references project_2_location_service.locations ("location_id"),
 	"rating" int,
 	primary key ("user_id", "location_id")
 );
-//"user_id" int references project_2_user_service.users ("user_id"),
+--"user_id" int references project_2_user_service.users ("user_id"),
 create table location_images(
 	"image_id" serial primary key,
 	"image" text not null
 );
 
 create table locations_location_images(
-	"location_id" int references locations("location_id"),
-	"image_id" int references location_images("image_id"),
+	"location_id" int references project_2_location_service.locations("location_id"),
+	"image_id" int references project_2_location_service.location_images("image_id"),
 	primary key ("location_id", "image_id")
 );
 
 
 --inserting fake data!!!
-
-insert into users ("username", "password", "first_name", "last_name", "affiliation", "address", "email", "role", "image")
-	values ('Mithrandir', 'YouShallNotPass', 'Gandalf', null, 'Fellowship', null, 'shadofaxTheFast@email.com', 'Admin', null),
-		   ('RingBearer', 'myPrecious', 'Frodo', 'Baggins', 'Fellowship', 'The Shire', 'frodoUnderhill@email.com', 'User', null),
-		   ('SamIAm', 'password', 'Samwise', 'Gamgee', 'Fellowship', 'The Shire', 'potatoes4life@email.com', 'User', null),
-           ('Strider', 'Actually87', 'Aragron II', 'Elessar Telcontar', 'Fellowship', 'Gondor', 'Heir2Isildur@email.com', 'User', null),
-           ('GoldenGimli','ThatStillOnlyCountsAs1', 'Gimli', null, 'Fellowship', 'Erebor', 'lockBearer@email.com', 'User', null),
-           ('CaptainOfTheWhiteTower', 'NearamirFaramir', 'Boromir', null, 'Fellowship', 'Gondor', 'sterwardPrince@email.com', 'User', null),
-           ('LorealLegolas', 'BecauseYouAreWorthIt', 'Legolas', 'Greenleaf', 'Fellowship', 'Mirkwood', 'EndlessQuiver@email.com', 'User', null),
-           ('Evenstar', 'Queen2Be', 'Arwen', null, 'Fellowship', 'Riverdell', 'comeANDclaimHIM@email.com', 'User', null),
-           ('Galadrielf', 'LadyofLight', 'Galadriel', null, 'Fellowship', 'Lothlorien', 'greatAndTerrible@email.com', 'Admin', null),
-		   ('Dernhelm', 'IAmNoMan', 'Eowyn', null, 'Rohirrim', 'Rohan', 'shieldMaiden@email.com', 'User', null),
-		   ('NotCountDooku', 'WiseWhiteWizard', 'Saruman', null, 'Sauron', 'Isengard', 'sharkley@email.com', 'User', null),
-           ('MerryMerry', 'BrandybuckBoi', 'Meriadoc', 'Brandybuck', 'Fellowship', 'The Shire','tallerThanPippin@email.com', 'User', null),
-           ('FoolOfATook', '00psMyBad', 'Peregrin', 'Took', 'Fellowship', 'The Shire', 'tallerThanMerry@email.com', 'User', null),
-           ('WitchKing', 'ThisKing', 'Forgotten', null, 'Sauron', 'Angmar', 'noManCanBeatMe@email.com', 'User', null),
-           ('SnakeySnake', 'notASpy', 'Grima', 'Wormtongue', 'Saruman', 'Rohan', 'everyoneHatesMe@emai.com', 'User', null);
---select * from users;
-
 insert into locations("name", "realm", "governance", "primary_population", "description", "lat", "lng")
 	values ('The Lonely Mountain', 'Erebor', 'Heirs of Durin', 'Dwarves', 'A mountain in the north-east of Rhovanion and the source of the river Running, and a major Dwarven stronghold', -39.304394, 175.526879),
            ('Rivendell', 'Eriador', 'Elrond', 'Elves', 'The beautiful, hidden refuge of the elves, on the west side of the Misty Mountains', -41.043036, 175.158078),
@@ -152,7 +119,7 @@ insert into location_images("image")
 		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/ThePathsOfTheDead.png'),
 		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/ThePathsOfTheDead2.png'),
 		   ('https://storage.googleapis.com/p2-fellowship/LOTR_Locations/Weathertop.png');
-select * from location_images; 
+--select * from location_images; 
 
 insert into locations_location_images("location_id", "image_id")
 	values	(1,30),(1,31),
@@ -173,7 +140,7 @@ insert into locations_location_images("location_id", "image_id")
 			(16,35),(16,36),
 			(17,12),(17,13),
 			(18,37),
-			(19,27),
+			(19,26),
 			(20,18),(20,19),(20,20);
 --select * from locations_location_images;
 
@@ -182,28 +149,28 @@ insert into locations_location_images("location_id", "image_id")
 --updating information dependent on other tables!!!
 
 --update the user's places_visited
-update users u 
+update project_2_user_service.users u 
 	set "places_visited" = 
 		(select COUNT(ul."location_id") 
-		from users_locations ul
+		from project_2_location_service.users_locations ul
 		where ul."user_id" = u."user_id")
 	where "user_id">0;--for all users
 --select ("username","places_visited") from  users;
 
 --update the location's num_visited
-update locations l
+update project_2_location_service.locations l
 	set "num_visited" = 
 		(select COUNT(ul."user_id") 
-		from users_locations ul
+		from project_2_location_service.users_locations ul
 		where ul."location_id" = l."location_id")
 	where "location_id">0; --for all locations
 --select ("name","num_visited") from  locations;
 
 -- update the average rating on the locations
-update locations l
+update project_2_location_service.locations l
 	set "avg_rating" = 
 		(select AVG(ul."rating") 
-		FROM users_locations ul
+		FROM project_2_location_service.users_locations ul
 		WHERE ul."location_id" = l."location_id")
 	where "location_id">0;
 

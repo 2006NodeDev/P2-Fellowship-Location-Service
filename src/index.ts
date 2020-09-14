@@ -7,8 +7,6 @@ import { logger, errorLogger } from './utils/logger'
 import './messaging/index'
 import './messaging/user-service-event-listeners'
 
-
-
 const basePath = process.env['LB_BASE_PATH'] || ''
 
 

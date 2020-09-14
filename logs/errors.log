@@ -43,3 +43,75 @@
     at Object.throw (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:14:53)
     at rejected (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:6:65)
     at processTicksAndRejections (internal/process/task_queues.js:97:5)
+[2020-08-10T02:08:21.917] [ERROR] error - error: relation "project_2_location_service.locations" does not exist
+    at Parser.parseErrorMessage (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\node_modules\pg-protocol\src\parser.ts:357:11)
+    at Parser.handlePacket (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\node_modules\pg-protocol\src\parser.ts:186:21)
+    at Parser.parse (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\node_modules\pg-protocol\src\parser.ts:101:30)
+    at Socket.<anonymous> (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\node_modules\pg-protocol\src\index.ts:7:48)
+    at Socket.emit (events.js:315:20)
+    at Socket.EventEmitter.emit (domain.js:482:12)
+    at addChunk (_stream_readable.js:295:12)
+    at readableAddChunk (_stream_readable.js:271:9)
+    at Socket.Readable.push (_stream_readable.js:212:10)
+    at TCP.onStreamRead (internal/stream_base_commons.js:186:23) {
+  length: 136,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '384',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1173',
+  routine: 'parserOpenTable'
+}
+[2020-08-10T02:08:21.945] [ERROR] error - Error: This error can't be handled, like the way the ring can't be handled by anyone but Frodo
+    at Object.<anonymous> (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:35:15)
+    at step (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:33:23)
+    at Object.throw (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:14:53)
+    at rejected (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:6:65)
+    at runMicrotasks (<anonymous>)
+    at processTicksAndRejections (internal/process/task_queues.js:97:5)
+[2020-08-10T02:08:22.063] [ERROR] error - error: relation "project_2_location_service.locations_location_images" does not exist
+    at Parser.parseErrorMessage (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\node_modules\pg-protocol\src\parser.ts:357:11)
+    at Parser.handlePacket (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\node_modules\pg-protocol\src\parser.ts:186:21)
+    at Parser.parse (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\node_modules\pg-protocol\src\parser.ts:101:30)
+    at Socket.<anonymous> (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\node_modules\pg-protocol\src\index.ts:7:48)
+    at Socket.emit (events.js:315:20)
+    at Socket.EventEmitter.emit (domain.js:482:12)
+    at addChunk (_stream_readable.js:295:12)
+    at readableAddChunk (_stream_readable.js:271:9)
+    at Socket.Readable.push (_stream_readable.js:212:10)
+    at TCP.onStreamRead (internal/stream_base_commons.js:186:23) {
+  length: 152,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '477',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1173',
+  routine: 'parserOpenTable'
+}
+[2020-08-10T02:08:22.076] [ERROR] error - Error: This error can't be handled, like the way the ring can't be handled by anyone but Frodo
+    at Object.<anonymous> (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:35:15)
+    at step (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:33:23)
+    at Object.throw (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:14:53)
+    at rejected (C:\Users\rares\Project2-Fellowship-FULL\P2-Fellowship-Location-Service\src\daos\SQL\location-dao.ts:6:65)
+    at runMicrotasks (<anonymous>)
+    at processTicksAndRejections (internal/process/task_queues.js:97:5)
